@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Flask-WebSocket
+Flask-uWSGI-WebSocket
 -------------
 High-performance WebSockets for your Flask apps powered by `uWSGI <http://uwsgi-docs.readthedocs.org/en/latest/>`_.
 """
@@ -9,15 +9,15 @@ from setuptools import setup
 
 
 setup(
-    name='Flask-WebSocket',
+    name='Flask-uWSGI-WebSocket',
     version='0.0.1',
-    url='https://github.com/zeekay/flask-websocket',
+    url='https://github.com/zeekay/flask-uwsgi-websocket',
     license='See License',
     author='Zach Kelling',
     author_email='zk@monoid.io',
     description='High-performance WebSockets for your Flask apps powered by uWSGI.',
     long_description=__doc__,
-    py_modules=['flask_websocket'],
+    py_modules=['flask_uwsgi_websocket'],
     zip_safe=False,
     include_package_data=True,
     platforms='any',
