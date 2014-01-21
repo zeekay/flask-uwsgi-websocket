@@ -5,12 +5,17 @@ High-performance WebSockets for your Flask apps powered by `uWSGI <http://uwsgi-
 """
 
 __docformat__ = 'restructuredtext'
-__version__ = '0.0.2'
+__version__ = '0.0.3'
 __license__ = 'MIT'
 __author__  = 'Zach Kelling'
 
+import sys
 from werkzeug.debug import DebuggedApplication
-import uwsgi
+
+try:
+    import uwsgi
+except ImportError:
+    pass
 
 
 class WebSocketClient(object):
