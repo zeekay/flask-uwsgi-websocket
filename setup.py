@@ -7,7 +7,7 @@ setup(
     name='Flask-uWSGI-WebSocket',
     version=__version__,
     url='https://github.com/zeekay/flask-uwsgi-websocket',
-    license=open('LICENSE').read().
+    license=open('LICENSE').read(),
     author='Zach Kelling',
     author_email='zk@monoid.io',
     description='High-performance WebSockets for your Flask apps powered by uWSGI.',
