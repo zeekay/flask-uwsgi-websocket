@@ -9,13 +9,13 @@ Inspired by `Flask-Sockets <https://github.com/kennethreitz/flask-sockets>`_.
     from flask.ext.uwsgi_websocket import WebSocket
 
     app = Flask(__name__)
-    websocket = WebSocket(app)
+    ws = WebSocket(app)
 
-    @websocket.route('/echo')
-    def echo(websocket):
+    @ws.route('/echo')
+    def echo(ws):
         while True:
-            message = websocket.receive()
-            websocket.send(message)
+            msg = ws.receive()
+            ws.send(message)
 
 Installation
 ------------
@@ -72,4 +72,4 @@ Flask-uWSGI-Websocket automatically performs the WebSocket handshake for you and
 
 ``websocket.send_binary_from_sharedarea(id, pos)``
 
-In addition there is a special ``websocket.receive`` method which makes using non-blocking calls simpler.
+In addition there is a special ``websocket.receive()`` method which makes using non-blocking calls simpler.
