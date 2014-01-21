@@ -1,22 +1,17 @@
 #!/usr/bin/env python
-
-"""
-Flask-uWSGI-WebSocket
--------------
-High-performance WebSockets for your Flask apps powered by `uWSGI <http://uwsgi-docs.readthedocs.org/en/latest/>`_.
-"""
 from setuptools import setup
+from flask_uwsgi_websocket import __version__
 
 
 setup(
     name='Flask-uWSGI-WebSocket',
-    version='0.0.2',
+    version=__version__,
     url='https://github.com/zeekay/flask-uwsgi-websocket',
-    license='See License',
+    license=open('LICENSE').read().
     author='Zach Kelling',
     author_email='zk@monoid.io',
     description='High-performance WebSockets for your Flask apps powered by uWSGI.',
-    long_description=__doc__,
+    long_description=open('README.rst').read(),
     py_modules=['flask_uwsgi_websocket'],
     zip_safe=False,
     include_package_data=True,
@@ -33,5 +28,6 @@ setup(
         'Programming Language :: Python',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
-    ]
+    ],
+    keywords='uwsgi flask websockets'
 )
