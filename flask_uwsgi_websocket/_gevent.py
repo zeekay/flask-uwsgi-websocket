@@ -1,6 +1,6 @@
-from . import WebSocketClient, WebSocketMiddleware
+from . import WebSocket, WebSocketClient, WebSocketMiddleware
+from ._uwsgi import uwsgi
 import gevent.select
-import uwsgi
 
 
 class GeventWebSocketClient(WebSocketClient):
@@ -14,3 +14,11 @@ class GeventWebSocketClient(WebSocketClient):
 
 class GeventWebSocketMiddleware(WebSocketMiddleware):
     Client = GeventWebSocketClient
+
+
+class GeventWebSocket(WebSocket):
+    def init_app(self, app):
+        if app.debug:
+            app.wsgi_app = DebuggedApplication(app.wsgi_app, True)
+
+        app.wsgi_app = GeventWebSocketMiddleware(app.wsgi_app, self)
