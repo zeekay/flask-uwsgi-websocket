@@ -1,8 +1,8 @@
-"""
+'''
 Flask-uWSGI-WebSocket
--------------
+---------------------
 High-performance WebSockets for your Flask apps powered by `uWSGI <http://uwsgi-docs.readthedocs.org/en/latest/>`_.
-"""
+'''
 
 __docformat__ = 'restructuredtext'
 __version__ = '0.0.3'
@@ -11,11 +11,7 @@ __author__  = 'Zach Kelling'
 
 import sys
 from werkzeug.debug import DebuggedApplication
-
-try:
-    import uwsgi
-except ImportError:
-    pass
+from ._uwsgi import uwsgi
 
 
 class WebSocketClient(object):
@@ -91,12 +87,4 @@ class WebSocket(object):
     def add_url_rule(self, rule, _, f, **options):
         self.websocket_routes[rule] = f
 
-
-class GeventWebSocket(WebSocket):
-    def init_app(self, app):
-        from .gevent_websocket import GeventWebSocketMiddleware
-
-        if app.debug:
-            app.wsgi_app = DebuggedApplication(app.wsgi_app, True)
-
-        app.wsgi_app = GeventWebSocketMiddleware(app.wsgi_app, self)
+from ._gevent import *
