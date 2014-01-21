@@ -1,5 +1,5 @@
 Flask-uWSGI-WebSocket
-===============
+=====================
 High-performance WebSockets for your Flask apps powered by `uWSGI <http://uwsgi-docs.readthedocs.org/en/latest/>`_.
 Inspired by `Flask-Sockets <https://github.com/kennethreitz/flask-sockets>`_.
 
