@@ -1,11 +1,10 @@
 #!/usr/bin/env python
 from setuptools import setup
-from flask_uwsgi_websocket import __version__
 
 
 setup(
     name='Flask-uWSGI-WebSocket',
-    version=__version__,
+    version='0.1.1',
     url='https://github.com/zeekay/flask-uwsgi-websocket',
     license=open('LICENSE').read(),
     author='Zach Kelling',
