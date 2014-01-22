@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from collections import deque
 from flask import Flask, render_template
 from flask.ext.uwsgi_websocket import GeventWebSocket
 
@@ -6,6 +7,7 @@ app = Flask(__name__)
 ws = GeventWebSocket(app)
 
 users = {}
+backlog = deque(maxlen=10)
 
 @app.route('/')
 def index():
@@ -15,9 +17,13 @@ def index():
 def chat(ws):
     users[ws.id] = ws
 
+    for msg in backlog:
+        ws.send(msg)
+
     while True:
         msg = ws.receive()
         if msg is not None:
+            backlog.append(msg)
             for id in users:
                 if id != ws.id:
                     users[id].send(msg)
