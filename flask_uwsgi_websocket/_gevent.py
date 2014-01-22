@@ -45,10 +45,10 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
         # setup events
         send_event = Event()
-        send_queue = Queue()
+        send_queue = Queue(maxsize=1)
 
         recv_event = Event()
-        recv_queue = Queue()
+        recv_queue = Queue(maxsize=1)
 
         # create websocket client
         client = self.client(uwsgi.connection_fd(), send_event, send_queue, recv_event, recv_queue)
@@ -74,9 +74,9 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
             # handle send events
             if send_event.is_set():
-                send_event.clear()
                 try:
                     uwsgi.websocket_send(send_queue.get())
+                    send_event.clear()
                 except IOError:
                     client.connected = False
 

@@ -10,25 +10,34 @@
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
     <script>
         $(document).ready(function() {
-            if (!window.WebSocket) {
-                if (window.MozWebSocket) {
-                    window.WebSocket = window.MozWebSocket;
-                } else {
-                    $('#messages').append("<li>Your browser doesn't support WebSockets.</li>");
-                }
-            }
-            ws = new WebSocket('ws://127.0.0.1:5000/websocket');
-            ws.onopen = function(evt) {
-                $('#messages').append('<li>Connected to chat.</li>');
-            }
-            ws.onmessage = function(evt) {
-                $('#messages').append('<li>' + evt.data + '</li>');
-            }
-            $('#send-message').submit(function() {
-                ws.send($('#name').val() + ": " + $('#message').val());
-                $('#message').val('').focus();
-                return false;
-            });
+          function showMessage(message) {
+            $('#messages').append('<li>' + message)
+          }
+
+          if (!window.WebSocket) {
+              if (window.MozWebSocket) {
+                  window.WebSocket = window.MozWebSocket;
+              } else {
+                showMessage("Your browser doesn't support WebSockets")
+              }
+          }
+
+          var ws = new WebSocket('ws://127.0.0.1:5000/websocket');
+          ws.onopen = function(evt) {
+            showMessage('Connected to chat.')
+          }
+
+          ws.onmessage = function(evt) {
+            showMessage(evt.data)
+          }
+
+          $('#send-message').submit(function() {
+            var message = $('#name').val() + ": " + $('#message').val();
+            showMessage(message)
+            ws.send(message);
+            // $('#message').val('').focus();
+            return false;
+          });
         });
     </script>
 </head>
