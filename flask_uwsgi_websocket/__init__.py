@@ -9,24 +9,21 @@ __version__ = '0.0.3'
 __license__ = 'MIT'
 __author__  = 'Zach Kelling'
 
+import os
 import sys
-from werkzeug.debug import DebuggedApplication
 from ._uwsgi import uwsgi
 
 
 class WebSocketClient(object):
-    def __init__(self, fd, timeout=100):
+    '''
+    Default WebSocket client has a blocking recieve method, but still exports rest of uWSGI API.
+    '''
+    def __init__(self, fd, timeout=60):
         self.fd = fd
         self.timeout = timeout
 
     def receive(self):
-        print 'hi'
-        uwsgi.wait_fd_read(self.fd, self.timeout)
-        uwsgi.suspend()
-        fd = uwsgi.ready_fd()
-        print fd
-        print 'hi'
-        return uwsgi.websocket_recv_nb()
+        return uwsgi.websocket_recv()
 
     def recv(self):
         return uwsgi.websocket_recv()
@@ -48,43 +45,77 @@ class WebSocketClient(object):
 
 
 class WebSocketMiddleware(object):
-    Client = WebSocketClient
+    client = WebSocketClient
 
-    def __init__(self, wsgi_app, ws):
-        self.app = wsgi_app
-        self.ws  = ws
+    def __init__(self, wsgi_app, websocket):
+        self.wsgi_app  = wsgi_app
+        self.websocket = websocket
 
     def __call__(self, environ, start_response):
-        handler = self.ws.websocket_routes.get(environ['PATH_INFO'])
+        handler = self.websocket.routes.get(environ['PATH_INFO'])
 
         if handler:
             uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
-            handler(self.Client(uwsgi.connection_fd(), self.ws.timeout))
+            handler(self.client(uwsgi.connection_fd(), self.websocket.timeout))
         else:
-            return self.app(environ, start_response)
+            return self.wsgi_app(environ, start_response)
 
 
 class WebSocket(object):
-    def __init__(self, app=None, timeout=100):
+    middleware = WebSocketMiddleware
+
+    def __init__(self, app=None, timeout=60):
         if app:
             self.init_app(app)
         self.timeout = timeout
-        self.websocket_routes = {}
+        self.routes = {}
+
+    def run(self, app=None, debug=False, host='localhost', port=5000, **kwargs):
+        if not app:
+            app = self.app.name + ':app'
+
+        # kwargs are treated as uwsgi arguments
+        if kwargs.get('master') is None:
+            kwargs['master'] = True
+
+        # boolean should be treated as empty value
+        for k,v in kwargs.items():
+            if v is True:
+                kwargs[k] = ''
+
+        # constructing uwsgi arguments
+        uwsgi_args = ' '.join(['--{0} {1}'.format(k,v) for k,v in kwargs.items()])
+        args = 'uwsgi --http {0}:{1} --http-websockets {2} --wsgi {3}'.format(host, port, uwsgi_args, app)
+
+        print args
+
+        # set enviromental variable to trigger adding debug middleware
+        if self.app.debug or debug:
+            args = 'FLASK_UWSGI_DEBUG=true {0}'.format(args)
+
+        # run uwsgi with our args
+        sys.exit(os.system(args))
 
     def init_app(self, app):
-        if app.debug:
+        self.app = app
+
+        if os.environ.get('FLASK_UWSGI_DEBUG'):
+            from werkzeug.debug import DebuggedApplication
             app.wsgi_app = DebuggedApplication(app.wsgi_app, True)
+            app.debug = True
 
-        app.wsgi_app = WebSocketMiddleware(app.wsgi_app, self)
+        app.wsgi_app = self.middleware(app.wsgi_app, self)
+        app.run = lambda **kwargs: self.run(**kwargs)
 
-    def route(self, rule, **options):
+    def route(self, rule):
         def decorator(f):
-            endpoint = options.pop('endpoint', None)
-            self.add_url_rule(rule, endpoint, f, **options)
+            self.routes[rule] = f
             return f
         return decorator
 
-    def add_url_rule(self, rule, _, f, **options):
-        self.websocket_routes[rule] = f
 
-from ._gevent import *
+from .async import *
+try:
+    from ._gevent import *
+except ImportError:
+    pass
