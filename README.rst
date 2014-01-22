@@ -79,33 +79,55 @@ API
 ---
 ``flask_uwsgi_websocket.WebSocket``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Automatically performs WebSocket handshake for you, but otherwise only exposes
-the `uWSGI WebSocket API
+``WebSocketMiddleware`` automatically performs WebSocket handshake and passes a ``WebSocketClient``
+instance to your route.
+
+
+``flask_uwsgi_websocket.WebSocketMiddleware``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+WebSocket Middleware used by ``WebSocket``.
+
+
+``flask_uwsgi_websocket.WebSocketClient``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Exposes the `uWSGI WebSocket API
 <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html#api>`_.
 
-``websocket.recv()`` (alias ``websocket.receive()``)
+``WebSocket.recv()`` (alias ``WebSocket.receive()``)
 
-``websocket.recv_nb()``
+``WebSocket.recv_nb()``
 
-``websocket.send(msg)``
+``WebSocket.send(msg)``
 
-``websocket.send_binary(msg)``
+``WebSocket.send_binary(msg)``
 
-``websocket.recv_nb()``
+``WebSocket.recv_nb()``
 
-``websocket.send_from_sharedarea(id, pos)``
+``WebSocket.send_from_sharedarea(id, pos)``
 
-``websocket.send_binary_from_sharedarea(id, pos)``
+``WebSocket.send_binary_from_sharedarea(id, pos)``
+
 
 ``flask_uwsgi_websocket.GeventWebSocket``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Fancier WebSocket abstraction that takes advantage of Gevent loop engine. Route
-handlers are spawned in their own greenlets and able to easily send messages to
-each other.
+Fancier WebSocket abstraction that takes advantage of Gevent loop engine.
+``GeventWebSocketMiddleware`` automatically performs WebSocket handshake and
+passes a ``GeventWebSocketClient`` instance to your route.  Requires uWSGI to
+be run with ``--uwsgi`` option.
+
+
+``flask_uwsgi_websocket.GeventWebSocketMiddleware``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+WebSocket Middleware used by ``GeventWebSocket``.
+
+
+``flask_uwsgi_websocket.GeventWebSocketClient``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+WebSocket client abstraction with fully non-blocking methods.
 
 ``websocket.receive()``
 
-``websocket.send()``
+``websocket.send(msg)``
 
 ``websocket.close()``
 
