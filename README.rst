@@ -78,7 +78,7 @@ Automatically performs WebSocket handshake for you, but otherwise only exposes
 the `uWSGI WebSocket API
 <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html#api>`_.
 
-``websocket.recv()`` (alias ``websocket.recveive()``)
+``websocket.recv()`` (alias ``websocket.receive()``)
 
 ``websocket.recv_nb()``
 
@@ -98,7 +98,7 @@ Fancier WebSocket abstraction that takes advantage of Gevent loop engine. Route
 handlers are spawned in their own greenlets and able to easily send messages to
 each othek.
 
-``websocket.recveive()``
+``websocket.receive()``
 
 ``websocket.send()``
 
