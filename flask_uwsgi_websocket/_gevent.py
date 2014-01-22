@@ -27,6 +27,9 @@ class GeventWebSocketClient(object):
     def receive(self):
         return self.recv_queue.get()
 
+    def close(self):
+        self.connected = False
+
 
 class GeventWebSocketMiddleware(WebSocketMiddleware):
     client = GeventWebSocketClient
