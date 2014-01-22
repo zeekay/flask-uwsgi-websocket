@@ -5,17 +5,26 @@ from flask.ext.uwsgi_websocket import GeventWebSocket
 app = Flask(__name__)
 ws = GeventWebSocket(app)
 
+users = {}
+
 @app.route('/')
 def index():
     return render_template('index.html')
 
 @ws.route('/websocket')
-def echo(ws):
+def chat(ws):
+    users[ws.id] = ws
+
     while True:
         msg = ws.receive()
         if msg is not None:
-            ws.send(msg)
-        else: return
+            print users
+            for id in users:
+                if id != ws.id:
+                    users[id].send(msg)
+        else: break
+
+    del users[ws.id]
 
 if __name__ == '__main__':
     app.run(debug=True, gevent=100)
