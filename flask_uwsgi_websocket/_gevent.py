@@ -5,7 +5,7 @@ from gevent.select import select
 from gevent.monkey import patch_all; patch_all()
 import uuid
 
-from . import WebSocket, WebSocketClient, WebSocketMiddleware
+from .websocket import WebSocket, WebSocketClient, WebSocketMiddleware
 from ._uwsgi import uwsgi
 
 

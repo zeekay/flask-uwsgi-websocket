@@ -1,4 +1,5 @@
-from . import uwsgi, WebSocket, WebSocketClient, WebSocketMiddleware
+from .websocket import WebSocket, WebSocketClient, WebSocketMiddleware
+from ._uwsgi import uwsgi
 
 
 class AsyncWebSocketClient(WebSocketClient):
