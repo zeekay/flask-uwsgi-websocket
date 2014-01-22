@@ -1,4 +1,4 @@
-from gevent import sleep, spawn, wait
+from gevent import killall, sleep, spawn, wait
 from gevent.event import Event
 from gevent.queue import Queue
 from gevent.select import select
@@ -18,6 +18,7 @@ class GeventWebSocketClient(object):
         self.recv_event = recv_event
         self.recv_queue = recv_queue
         self.timeout = timeout
+        self.connected = True
 
     def send(self, message):
         self.send_queue.put(message)
@@ -49,30 +50,44 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         client = self.client(uwsgi.connection_fd(), send_event, send_queue, recv_event, recv_queue)
 
         # spawn handler
-        spawn(handler, client)
+        handler_g = spawn(handler, client)
 
         # spawn recv listener
         def listener(client):
             ready = select([client.fd], [], [], client.timeout)
             recv_event.set()
-        spawn(listener, client)
+        listener_g = spawn(listener, client)
 
         while True:
-            ready = wait([send_event, recv_event], None, 1)
+            if not client.connected:
+                recv_queue.put(None)
+                handler_g.join(client.timeout)
+                return ''
+
+            # wait for event to draw our attention
+            ready = wait([handler_g, send_event, recv_event], None, 1)
+
+            # handle send events
             if send_event.is_set():
                 send_event.clear()
                 try:
                     uwsgi.websocket_send(send_queue.get())
-                except IOError:  # client disconnected
-                    pass
+                except IOError:
+                    client.connected = False
 
-            if recv_event.is_set():
+            # handle receive events
+            elif recv_event.is_set():
                 recv_event.clear()
                 try:
                     recv_queue.put(uwsgi.websocket_recv_nb())
-                    spawn(listener, client)
-                except IOError:  # client disconnected
-                    pass
+                    listener_g = spawn(listener, client)
+                except IOError:
+                    client.connected = False
+
+            # handler all cleaned up and ready to go
+            elif handler_g.ready():
+                listener_g.kill()
+                return ''
 
 
 class GeventWebSocket(WebSocket):
