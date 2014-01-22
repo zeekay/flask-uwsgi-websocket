@@ -50,25 +50,27 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         recv_event = Event()
         recv_queue = Queue()
 
+        # create websocket client
         client = self.client(uwsgi.connection_fd(), send_event, send_queue, recv_event, recv_queue)
 
         # spawn handler
-        handler_g = spawn(handler, client)
+        handler = spawn(handler, client)
 
         # spawn recv listener
         def listener(client):
             ready = select([client.fd], [], [], client.timeout)
             recv_event.set()
-        listener_g = spawn(listener, client)
+        listening = spawn(listener, client)
 
         while True:
             if not client.connected:
                 recv_queue.put(None)
-                handler_g.join(client.timeout)
+                listening.kill()
+                handler.join(client.timeout)
                 return ''
 
             # wait for event to draw our attention
-            ready = wait([handler_g, send_event, recv_event], None, 1)
+            ready = wait([handler, send_event, recv_event], None, 1)
 
             # handle send events
             if send_event.is_set():
@@ -83,13 +85,13 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                 recv_event.clear()
                 try:
                     recv_queue.put(uwsgi.websocket_recv_nb())
-                    listener_g = spawn(listener, client)
+                    listening = spawn(listener, client)
                 except IOError:
                     client.connected = False
 
-            # handler all cleaned up and ready to go
-            elif handler_g.ready():
-                listener_g.kill()
+            # handler done, we're outta here
+            elif handler.ready():
+                listening.kill()
                 return ''
 
 
