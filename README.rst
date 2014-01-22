@@ -75,6 +75,10 @@ If you use ``app.run(debug=True)`` or export ``FLASK_UWSGI_DEBUG``,
 Flask-uWSGI-Websocket will do this automatically for you.
 
 
+Examples
+--------
+There are several examples `available here <https://github.com/zeekay/flask-uwsgi-websocket/tree/master/examples>`_.
+
 API
 ---
 ``flask_uwsgi_websocket.WebSocket``
