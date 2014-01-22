@@ -79,13 +79,21 @@ API
 ---
 ``flask_uwsgi_websocket.WebSocket``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-``WebSocketMiddleware`` automatically performs WebSocket handshake and passes a ``WebSocketClient``
-instance to your route.
+Applies ``WebSocketMiddleware`` to your Flask App, allowing you to decorate
+routes with the ``route`` method, turning them into WebSocket handlers.
+
+Additionally monkey-patches ``app.run``, to run your app directly in uWSGI.
+
+``route(url)``
+
+``run(debug, host, port, **kwargs)``
+``**kwargs`` are passed to uWSGI as command line arguments.
 
 
 ``flask_uwsgi_websocket.WebSocketMiddleware``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-WebSocket Middleware used by ``WebSocket``.
+WebSocket Middleware which automatically performs WebSocket handshake and
+passes ``WebSocketClient`` instances to your route.
 
 
 ``flask_uwsgi_websocket.WebSocketClient``
@@ -93,42 +101,40 @@ WebSocket Middleware used by ``WebSocket``.
 Exposes the `uWSGI WebSocket API
 <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html#api>`_.
 
-``WebSocket.recv()`` (alias ``WebSocket.receive()``)
+``recv()`` (alias ``WebSocket.receive()``)
 
-``WebSocket.recv_nb()``
+``recv_nb()``
 
-``WebSocket.send(msg)``
+``send(msg)``
 
-``WebSocket.send_binary(msg)``
+``send_binary(msg)``
 
-``WebSocket.recv_nb()``
+``recv_nb()``
 
-``WebSocket.send_from_sharedarea(id, pos)``
+``send_from_sharedarea(id, pos)``
 
-``WebSocket.send_binary_from_sharedarea(id, pos)``
+``send_binary_from_sharedarea(id, pos)``
 
 
 ``flask_uwsgi_websocket.GeventWebSocket``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Fancier WebSocket abstraction that takes advantage of Gevent loop engine.
-``GeventWebSocketMiddleware`` automatically performs WebSocket handshake and
-passes a ``GeventWebSocketClient`` instance to your route.  Requires uWSGI to
-be run with ``--uwsgi`` option.
+Requires uWSGI to be run with ``--uwsgi`` option.
 
 
 ``flask_uwsgi_websocket.GeventWebSocketMiddleware``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-WebSocket Middleware used by ``GeventWebSocket``.
+Automatically performs WebSocket handshake and passes a ``GeventWebSocketClient`` instance to your route.
 
 
 ``flask_uwsgi_websocket.GeventWebSocketClient``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 WebSocket client abstraction with fully non-blocking methods.
 
-``websocket.receive()``
+``receive()``
 
-``websocket.send(msg)``
+``send(msg)``
 
-``websocket.close()``
+``close()``
 
-``websocket.connected``
+``connected``
