@@ -24,11 +24,13 @@ including Gevent. Inspired by `Flask-Sockets
     if __name__ == '__main__':
         app.run(gevent=100)
 
+
 Installation
 ------------
 Preferred method of installation is via pip::
 
     $ pip install Flask-uWSGI-WebSocket
+
 
 Deployment
 ----------
@@ -51,10 +53,10 @@ gevent loop engine::
 
     app.run(debug=True, gevent=100)
 
-For production you'll probably want to run uWSGI behind Haproxy or nginx of
-course, instead of using the built-int HTTP router.  Explore the `uWSGI
-documentation <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html>`_
-for more detail.
+For production you'll probably want to run uWSGI behind Haproxy or nginx,
+instead of using the built-int HTTP router. Explore the `uWSGI documentation
+<http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html>`_ for more
+detail about the various concurrency and deployment options.
 
 
 Development
