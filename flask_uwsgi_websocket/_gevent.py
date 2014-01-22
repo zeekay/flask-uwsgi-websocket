@@ -2,6 +2,7 @@ from gevent import sleep, spawn
 from gevent.event import Event
 from gevent.queue import Queue
 from gevent.select import select
+from gevent.monkey import patch_all; patch_all()
 import uuid
 
 from . import WebSocket, WebSocketClient, WebSocketMiddleware
@@ -9,8 +10,9 @@ from ._uwsgi import uwsgi
 
 
 class GeventWebSocketClient(object):
-    def __init__(self, send_event, send_queue, recv_event, recv_queue, timeout=60):
+    def __init__(self, fd, send_event, send_queue, recv_event, recv_queue, timeout=60):
         self.id = str(uuid.uuid1())
+        self.fd = fd
         self.send_event = send_event
         self.send_queue = send_queue
         self.recv_event = recv_event
@@ -20,12 +22,10 @@ class GeventWebSocketClient(object):
     def send(self, message):
         self.send_queue.put(message)
         self.send_event.set()
-        self.send_event.clear()
 
     def receive(self):
         self.recv_event.set()
-        self.recv_event.clear()
-        self.recv_queue.get()
+        return self.recv_queue.get()
 
 
 class GeventWebSocketMiddleware(WebSocketMiddleware):
@@ -40,37 +40,41 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         # do handshake
         uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
 
+        # setup events
         send_event = Event()
         send_queue = Queue()
 
         recv_event = Event()
         recv_queue = Queue()
 
-        client = self.client(send_event, send_queue, recv_event, recv_queue)
+        client = self.client(uwsgi.connection_fd(), send_event, send_queue, recv_event, recv_queue)
 
-        fd = uwsgi.connection_fd()
+        # spawn handler
+        spawn(handler, client)
 
-        def send():
-            ready.set()
-            message = send_queue.get()
-            uwsgi.websocket_send(message)
-        send_event.rawlink(send)
-
-        def listen():
-            ready.set()
-            select([fd], [], [], client.timeout)
-            try:
-                recv_queue.put(uwsgi.websocket_recv_nb())
-            except IOError:  # client disconnected
-                pass
-        recv_event.rawlink(listen)
-
-        ready = Event()
+        # spawn recv listener
+        def listener(client):
+            ready = select([client.fd], [], [], client.timeout)
+            recv_event.set()
+        spawn(listener, client)
 
         while True:
-            ready.clear()
-            ready.wait()
+            if send_event.is_set():
+                send_event.clear()
+                try:
+                    uwsgi.websocket_send(send_queue.get())
+                except IOError:  # client disconnected
+                    pass
 
+            if recv_event.is_set():
+                recv_event.clear()
+                try:
+                    recv_queue.put(uwsgi.websocket_recv_nb())
+                    spawn(listener, client)
+                except IOError:  # client disconnected
+                    pass
+
+            sleep(0.1)
 
 class GeventWebSocket(WebSocket):
     middleware = GeventWebSocketMiddleware
