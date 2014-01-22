@@ -6,7 +6,7 @@ root = lambda path: join(dirname(realpath(__file__)), path)
 
 setup(
     name='Flask-uWSGI-WebSocket',
-    version='0.1.1',
+    version='0.1.2',
     url='https://github.com/zeekay/flask-uwsgi-websocket',
     license=open(root('LICENSE')).read(),
     author='Zach Kelling',
