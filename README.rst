@@ -99,7 +99,7 @@ the `uWSGI WebSocket API
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 Fancier WebSocket abstraction that takes advantage of Gevent loop engine. Route
 handlers are spawned in their own greenlets and able to easily send messages to
-each othek.
+each other.
 
 ``websocket.receive()``
 
