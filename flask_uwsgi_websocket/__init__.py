@@ -11,6 +11,7 @@ __author__  = 'Zach Kelling'
 
 import os
 import sys
+import uuid
 from ._uwsgi import uwsgi
 
 
@@ -21,6 +22,7 @@ class WebSocketClient(object):
     def __init__(self, fd, timeout=60):
         self.fd = fd
         self.timeout = timeout
+        self.id = str(uuid.uuid1())
 
     def receive(self):
         return uwsgi.websocket_recv()

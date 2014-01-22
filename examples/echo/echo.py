@@ -9,16 +9,13 @@ ws = WebSocket(app)
 def index():
     return render_template('index.html')
 
-@app.route('/oops')
-def oops():
-    raise Exception('oops')
-
 @ws.route('/websocket')
 def echo(ws):
     while True:
         msg = ws.receive()
-        if not msg: return
-        ws.send(msg)
+        if msg is not None:
+            ws.send(msg)
+        else: return
 
 if __name__ == '__main__':
     app.run(debug=True, threads=16)
