@@ -1,16 +1,19 @@
 Flask-uWSGI-WebSocket
 =====================
 High-performance WebSockets for your Flask apps powered by `uWSGI
-<http://uwsgi-docs.readthedocs.org/en/latest/>`_.  Inspired by `Flask-Sockets
+<http://uwsgi-docs.readthedocs.org/en/latest/>`_. Low-level uWSGI WebSocket API
+access and flexible high-level abstractions for building complex WebSocket
+applications with Flask. Supports several different concurrency models
+including Gevent. Inspired by `Flask-Sockets
 <https://github.com/kennethreitz/flask-sockets>`_.
 
 .. code-block:: python
 
     from flask import Flask
-    from flask.ext.uwsgi_websocket import WebSocket
+    from flask.ext.uwsgi_websocket import GeventWebSocket
 
     app = Flask(__name__)
-    ws = WebSocket(app)
+    ws = GeventWebSocket(app)
 
     @ws.route('/echo')
     def echo(ws):
@@ -19,11 +22,11 @@ High-performance WebSockets for your Flask apps powered by `uWSGI
             ws.send(message)
 
     if __name__ == '__main__':
-        app.run(debug=True, threads=16)
+        app.run(gevent=100)
 
 Installation
 ------------
-To install Flask-uWSGI-WebSocket, simply::
+Preferred method of installation is via pip::
 
     $ pip install Flask-uWSGI-WebSocket
 
@@ -31,18 +34,18 @@ Deployment
 ----------
 You can use uWSGI's built-in HTTP router to get up and running quickly::
 
-    $ uwsgi --master --http :8080 --http-websockets --wsgi-file app.py
+    $ uwsgi --master --http :8080 --http-websockets --wsgi echo:app
 
-...or call ``app.run``, passing uwsgi any arguments you like::
+...which is what ``app.run`` does after wrapping your Flask app::
 
     app.run(debug=True, host='localhost', port=8080, master=true, processes=8)
 
 uWSGI supports several concurrency models, in particular it has nice support
 for Gevent. If you want to use Gevent, import
 ``flask.ext.uwsgi_websocket.GeventWebSocket`` and configure uWSGI to use the
-gevent loop engine:
+gevent loop engine::
 
-    $ uwsgi --master --http :8080 --http-websockets --gevent 100 --wsgi-file app.py
+    $ uwsgi --master --http :8080 --http-websockets --gevent 100 --wsgi echo:app
 
 ...or::
 
@@ -66,8 +69,8 @@ werkzeug's ``DebuggedApplication`` middleware::
 
     $ uwsgi --master --http :8080 --http-websockets --wsgi-file --workers 1 --threads 8 app.py
 
-If you use ``app.run(debug=True)``, Flask-uWSGI-Websocket will do this
-automatically for you.
+If you use ``app.run(debug=True)`` or export ``FLASK_UWSGI_DEBUG``,
+Flask-uWSGI-Websocket will do this automatically for you.
 
 
 API
