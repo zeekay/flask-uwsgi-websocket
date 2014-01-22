@@ -93,4 +93,4 @@ make non-blocking calls simpler. When using the ``WebSocket`` plugin, it blocks
 making it appropriate for threaded or multiprocess concurrency models. When
 using ``GeventWebSocket`` it'll take advantage of gevent and make a
 non-blocking recv call. ``AsyncWebsocket`` should do roughly the same thing,
-but currently plain ``--async`` concurrency model is a bit buggy with uWSGI 2.0.
+but currently plain ``--async`` concurrency model is a bit buggy in uWSGI 2.0.
