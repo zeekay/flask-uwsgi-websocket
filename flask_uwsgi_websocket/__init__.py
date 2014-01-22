@@ -40,10 +40,10 @@ class WebSocketClient(object):
         return uwsgi.websocket_send_binary(msg)
 
     def send_from_sharedarea(self, id, pos):
-        return uwsgi.websocket_send_from_sharedarea(msg)
+        return uwsgi.websocket_send_from_sharedarea(id, pos)
 
     def send_binary_from_sharedarea(self, id, pos):
-        return uwsgi.websocket_send_binary_from_sharedarea(msg)
+        return uwsgi.websocket_send_binary_from_sharedarea(id, pos)
 
 
 class WebSocketMiddleware(object):
