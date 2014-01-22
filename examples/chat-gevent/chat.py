@@ -18,11 +18,11 @@ def chat(ws):
     while True:
         msg = ws.receive()
         if msg is not None:
-            print users
             for id in users:
                 if id != ws.id:
                     users[id].send(msg)
-        else: break
+        else:
+            break
 
     del users[ws.id]
 
