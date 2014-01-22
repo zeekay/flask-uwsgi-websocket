@@ -1,4 +1,4 @@
-from gevent import sleep, spawn
+from gevent import sleep, spawn, wait
 from gevent.event import Event
 from gevent.queue import Queue
 from gevent.select import select
@@ -24,7 +24,6 @@ class GeventWebSocketClient(object):
         self.send_event.set()
 
     def receive(self):
-        self.recv_event.set()
         return self.recv_queue.get()
 
 
@@ -59,6 +58,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         spawn(listener, client)
 
         while True:
+            ready = wait([send_event, recv_event], None, 1)
             if send_event.is_set():
                 send_event.clear()
                 try:
@@ -74,7 +74,6 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                 except IOError:  # client disconnected
                     pass
 
-            sleep(0.1)
 
 class GeventWebSocket(WebSocket):
     middleware = GeventWebSocketMiddleware
