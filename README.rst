@@ -72,11 +72,15 @@ automatically for you.
 
 API
 ---
-Flask-uWSGI-Websocket automatically performs the WebSocket handshake for you
-and passes your route handler a websocket client exposing `uWSGI's WebSocket API
+``flask_uwsgi_websocket.WebSocket``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Automatically performs WebSocket handshake for you, but otherwise only exposes
+the `uWSGI WebSocket API
 <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html#api>`_.
 
-``websocket.recv()``
+``websocket.recv()`` (alias ``websocket.recveive()``)
+
+``websocket.recv_nb()``
 
 ``websocket.send(msg)``
 
@@ -88,9 +92,16 @@ and passes your route handler a websocket client exposing `uWSGI's WebSocket API
 
 ``websocket.send_binary_from_sharedarea(id, pos)``
 
-In addition there is a special ``websocket.receive()`` method which tries to
-make non-blocking calls simpler. When using the ``WebSocket`` plugin, it blocks
-making it appropriate for threaded or multiprocess concurrency models. When
-using ``GeventWebSocket`` it'll take advantage of gevent and make a
-non-blocking recv call. ``AsyncWebsocket`` should do roughly the same thing,
-but currently plain ``--async`` concurrency model is a bit buggy in uWSGI 2.0.
+``flask_uwsgi_websocket.GeventWebSocket``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Fancier WebSocket abstraction that takes advantage of Gevent loop engine. Route
+handlers are spawned in their own greenlets and able to easily send messages to
+each othek.
+
+``websocket.recveive()``
+
+``websocket.send()``
+
+``websocket.close()``
+
+``websocket.connected``
