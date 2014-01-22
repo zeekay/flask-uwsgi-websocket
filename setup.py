@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-from setuptools import setup
+from setuptools import find_packages, setup
 
 setup(
     name='Flask-uWSGI-WebSocket',
@@ -13,6 +13,7 @@ setup(
     py_modules=['flask_uwsgi_websocket'],
     zip_safe=False,
     include_package_data=True,
+    packages=find_packages(),
     platforms='any',
     install_requires=[
         'Flask',
