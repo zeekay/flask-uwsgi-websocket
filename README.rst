@@ -73,7 +73,7 @@ automatically for you.
 API
 ---
 Flask-uWSGI-Websocket automatically performs the WebSocket handshake for you
-and passes your router a websocket client exposing `uWSGI's WebSocket API
+and passes your route handler a websocket client exposing `uWSGI's WebSocket API
 <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html#api>`_.
 
 ``websocket.recv()``
@@ -88,5 +88,9 @@ and passes your router a websocket client exposing `uWSGI's WebSocket API
 
 ``websocket.send_binary_from_sharedarea(id, pos)``
 
-In addition there is a special ``websocket.receive()`` method which makes using
-non-blocking calls simpler.
+In addition there is a special ``websocket.receive()`` method which tries to
+make non-blocking calls simpler. When using the ``WebSocket`` plugin, it blocks
+making it appropriate for threaded or multiprocess concurrency models. When
+using ``GeventWebSocket`` it'll take advantage of gevent and make a
+non-blocking recv call. ``AsyncWebsocket`` should do roughly the same thing,
+but currently plain ``--async`` concurrency model is a bit buggy with uWSGI 2.0.
