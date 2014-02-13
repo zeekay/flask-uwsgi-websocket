@@ -9,10 +9,11 @@ class WebSocketClient(object):
     Default WebSocket client has a blocking recieve method, but still exports
     rest of uWSGI API.
     '''
-    def __init__(self, fd, timeout=60):
-        self.fd = fd
+    def __init__(self, environ, fd, timeout=60):
+        self.environ = environ
+        self.fd      = fd
         self.timeout = timeout
-        self.id = str(uuid.uuid1())
+        self.id      = str(uuid.uuid1())
 
     def receive(self):
         return uwsgi.websocket_recv()
@@ -51,7 +52,7 @@ class WebSocketMiddleware(object):
 
         if handler:
             uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
-            handler(self.client(uwsgi.connection_fd(), self.websocket.timeout))
+            handler(self.client(environ, uwsgi.connection_fd(), self.websocket.timeout))
         else:
             return self.wsgi_app(environ, start_response)
 

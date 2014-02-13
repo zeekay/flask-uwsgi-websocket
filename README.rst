@@ -142,3 +142,18 @@ WebSocket client abstraction with fully non-blocking methods.
 ``close()``
 
 ``connected``
+
+
+Advanced Usage
+--------------
+Normally websocket routes happen outside of the normal request context. You can
+get a request context in your websocket handler by using
+`app.request_context`::
+
+    app = Flask(__name__)
+    ws = GeventWebSocket(app)
+
+    @ws.route('/websocket')
+    def websocket(ws):
+        with app.request_context(ws.environ):
+            print request.args

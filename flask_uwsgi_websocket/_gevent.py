@@ -10,15 +10,17 @@ from ._uwsgi import uwsgi
 
 
 class GeventWebSocketClient(object):
-    def __init__(self, fd, send_event, send_queue, recv_event, recv_queue, timeout=60):
-        self.id = str(uuid.uuid1())
-        self.fd = fd
+    def __init__(self, environ, fd, send_event, send_queue, recv_event, recv_queue, timeout=60):
+        self.environ    = environ
+        self.fd         = fd
         self.send_event = send_event
         self.send_queue = send_queue
         self.recv_event = recv_event
         self.recv_queue = recv_queue
-        self.timeout = timeout
-        self.connected = True
+        self.timeout    = timeout
+
+        self.id         = str(uuid.uuid1())
+        self.connected  = True
 
     def send(self, message):
         self.send_queue.put(message)
@@ -51,7 +53,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         recv_queue = Queue(maxsize=1)
 
         # create websocket client
-        client = self.client(uwsgi.connection_fd(), send_event, send_queue, recv_event, recv_queue)
+        client = self.client(environ, uwsgi.connection_fd(), send_event, send_queue, recv_event, recv_queue)
 
         # spawn handler
         handler = spawn(handler, client)
