@@ -53,7 +53,8 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         recv_queue = Queue(maxsize=1)
 
         # create websocket client
-        client = self.client(environ, uwsgi.connection_fd(), send_event, send_queue, recv_event, recv_queue)
+        client = self.client(environ, uwsgi.connection_fd(), send_event,
+                             send_queue, recv_event, recv_queue, self.websocket.timeout)
 
         # spawn handler
         handler = spawn(handler, client)
