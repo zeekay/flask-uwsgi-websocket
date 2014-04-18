@@ -53,6 +53,9 @@ gevent loop engine::
 
     app.run(debug=True, gevent=100)
 
+
+Note that you cannot use multiple threads with gevent loop engine.
+
 For production you'll probably want to run uWSGI behind Haproxy or nginx,
 instead of using the built-int HTTP router. Explore the `uWSGI documentation
 <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html>`_ for more
