@@ -19,7 +19,7 @@ including Gevent. Inspired by `Flask-Sockets
     def echo(ws):
         while True:
             msg = ws.receive()
-            ws.send(message)
+            ws.send(msg)
 
     if __name__ == '__main__':
         app.run(gevent=100)
