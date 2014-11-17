@@ -91,7 +91,7 @@ class WebSocket(object):
 
         # set enviromental variable to trigger adding debug middleware
         if self.app.debug or debug:
-            args = 'FLASK_UWSGI_DEBUG=true {0}'.format(args)
+            args = 'FLASK_UWSGI_DEBUG=true {0} --python-autoreload 1'.format(args)
 
         # run uwsgi with our args
         sys.exit(os.system(args))
