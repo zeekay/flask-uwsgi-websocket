@@ -81,7 +81,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                     try:
                         while True:
                             uwsgi.websocket_send(send_queue.get_nowait())
-                    execpt Empty:
+                    except Empty:
                         send_event.clear()
                 except IOError:
                     client.connected = False
