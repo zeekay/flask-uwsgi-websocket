@@ -1,6 +1,6 @@
 from gevent import killall, sleep, spawn, wait
 from gevent.event import Event
-from gevent.queue import Queue
+from gevent.queue import Queue, Empty
 from gevent.select import select
 from gevent.monkey import patch_all; patch_all()
 import uuid
@@ -78,8 +78,10 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             # handle send events
             if send_event.is_set():
                 try:
-                    uwsgi.websocket_send(send_queue.get())
-                    if send_queue.qsize() == 0:
+                    try:
+                        while True:
+                            uwsgi.websocket_send(send_queue.get_nowait())
+                    execpt Empty:
                         send_event.clear()
                 except IOError:
                     client.connected = False
