@@ -87,13 +87,12 @@ class WebSocket(object):
         uwsgi_args = ' '.join(['--{0} {1}'.format(k,v) for k,v in kwargs.items()])
         args = 'uwsgi --http {0}:{1} --http-websockets {2} --wsgi {3}'.format(host, port, uwsgi_args, app)
 
-        print(args)
-
         # set enviromental variable to trigger adding debug middleware
         if self.app.debug or debug:
             args = 'FLASK_UWSGI_DEBUG=true {0} --python-autoreload 1'.format(args)
 
         # run uwsgi with our args
+        print('Running: {0}'.format(args))
         sys.exit(os.system(args))
 
     def init_app(self, app):
