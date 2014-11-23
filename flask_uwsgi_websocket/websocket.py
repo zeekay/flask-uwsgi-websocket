@@ -50,11 +50,11 @@ class WebSocketMiddleware(object):
     def __call__(self, environ, start_response):
         handler = self.websocket.routes.get(environ['PATH_INFO'])
 
-        if handler:
-            uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
-            handler(self.client(environ, uwsgi.connection_fd(), self.websocket.timeout))
-        else:
+        if not handler or 'HTTP_SEC_WEBSOCKET_KEY' not in environ:
             return self.wsgi_app(environ, start_response)
+
+        uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
+        handler(self.client(environ, uwsgi.connection_fd(), self.websocket.timeout))
 
 
 class WebSocket(object):
