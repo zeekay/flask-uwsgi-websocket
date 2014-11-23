@@ -9,10 +9,6 @@ __version__ = '0.2.9'
 __license__ = 'MIT'
 __author__  = 'Zach Kelling'
 
-import os
-import sys
-import uuid
-
 from ._uwsgi import uwsgi
 from .websocket import *
 from .async import *
