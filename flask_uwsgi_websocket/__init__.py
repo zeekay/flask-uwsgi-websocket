@@ -13,7 +13,12 @@ from ._uwsgi import uwsgi
 from .websocket import *
 from .async import *
 
+class GeventNotInstalled(Exception):
+    pass
+
 try:
     from ._gevent import *
 except ImportError:
-    pass
+    class GeventWebSocket(object):
+        def __init__(self, *args, **kwargs):
+            raise GeventNotInstalled("Gevent must be installed to use GeventWebSocket. Try: `pip install gevent`.")
