@@ -2,6 +2,7 @@ import os
 import sys
 import uuid
 from ._uwsgi import uwsgi
+from gevent.monkey import patch_all
 
 
 class WebSocketClient(object):
@@ -97,6 +98,9 @@ class WebSocket(object):
 
     def init_app(self, app):
         self.app = app
+
+        aggressive_patch = app.config.get('UWSGI_WEBSOCKET_AGGRESSIVE_PATCH', True)
+        patch_all(aggressive=aggressive_patch)
 
         if os.environ.get('FLASK_UWSGI_DEBUG'):
             from werkzeug.debug import DebuggedApplication
