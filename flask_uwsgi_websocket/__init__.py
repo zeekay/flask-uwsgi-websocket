@@ -5,19 +5,20 @@ High-performance WebSockets for your Flask apps powered by `uWSGI <http://uwsgi-
 '''
 
 __docformat__ = 'restructuredtext'
-__version__ = '0.2.5'
+__version__ = '0.2.10'
 __license__ = 'MIT'
 __author__  = 'Zach Kelling'
-
-import os
-import sys
-import uuid
 
 from ._uwsgi import uwsgi
 from .websocket import *
 from .async import *
 
+class GeventNotInstalled(Exception):
+    pass
+
 try:
     from ._gevent import *
 except ImportError:
-    pass
+    class GeventWebSocket(object):
+        def __init__(self, *args, **kwargs):
+            raise GeventNotInstalled("Gevent must be installed to use GeventWebSocket. Try: `pip install gevent`.")

@@ -1,8 +1,7 @@
 from gevent import killall, sleep, spawn, wait
 from gevent.event import Event
-from gevent.queue import Queue
+from gevent.queue import Queue, Empty
 from gevent.select import select
-from gevent.monkey import patch_all; patch_all()
 import uuid
 
 from .websocket import WebSocket, WebSocketClient, WebSocketMiddleware
@@ -39,7 +38,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
     def __call__(self, environ, start_response):
         handler = self.websocket.routes.get(environ['PATH_INFO'])
 
-        if not handler:
+        if not handler or 'HTTP_SEC_WEBSOCKET_KEY' not in environ:
             return self.wsgi_app(environ, start_response)
 
         # do handshake
@@ -47,7 +46,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
         # setup events
         send_event = Event()
-        send_queue = Queue(maxsize=1)
+        send_queue = Queue()
 
         recv_event = Event()
         recv_queue = Queue(maxsize=1)
@@ -78,8 +77,11 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             # handle send events
             if send_event.is_set():
                 try:
-                    uwsgi.websocket_send(send_queue.get())
-                    send_event.clear()
+                    try:
+                        while True:
+                            uwsgi.websocket_send(send_queue.get_nowait())
+                    except Empty:
+                        send_event.clear()
                 except IOError:
                     client.connected = False
 

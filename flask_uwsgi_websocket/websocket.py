@@ -2,6 +2,7 @@ import os
 import sys
 import uuid
 from ._uwsgi import uwsgi
+from gevent.monkey import patch_all
 
 
 class WebSocketClient(object):
@@ -50,11 +51,11 @@ class WebSocketMiddleware(object):
     def __call__(self, environ, start_response):
         handler = self.websocket.routes.get(environ['PATH_INFO'])
 
-        if handler:
-            uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
-            handler(self.client(environ, uwsgi.connection_fd(), self.websocket.timeout))
-        else:
+        if not handler or 'HTTP_SEC_WEBSOCKET_KEY' not in environ:
             return self.wsgi_app(environ, start_response)
+
+        uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
+        handler(self.client(environ, uwsgi.connection_fd(), self.websocket.timeout))
 
 
 class WebSocket(object):
@@ -87,17 +88,19 @@ class WebSocket(object):
         uwsgi_args = ' '.join(['--{0} {1}'.format(k,v) for k,v in kwargs.items()])
         args = 'uwsgi --http {0}:{1} --http-websockets {2} --wsgi {3}'.format(host, port, uwsgi_args, app)
 
-        print(args)
-
         # set enviromental variable to trigger adding debug middleware
         if self.app.debug or debug:
-            args = 'FLASK_UWSGI_DEBUG=true {0}'.format(args)
+            args = 'FLASK_UWSGI_DEBUG=true {0} --python-autoreload 1'.format(args)
 
         # run uwsgi with our args
+        print('Running: {0}'.format(args))
         sys.exit(os.system(args))
 
     def init_app(self, app):
         self.app = app
+
+        aggressive_patch = app.config.get('UWSGI_WEBSOCKET_AGGRESSIVE_PATCH', True)
+        patch_all(aggressive=aggressive_patch)
 
         if os.environ.get('FLASK_UWSGI_DEBUG'):
             from werkzeug.debug import DebuggedApplication
