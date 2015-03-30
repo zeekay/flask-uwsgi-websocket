@@ -1,10 +1,10 @@
-from gevent import killall, sleep, spawn, wait
+from gevent import spawn, wait
 from gevent.event import Event
 from gevent.queue import Queue, Empty
 from gevent.select import select
 import uuid
 
-from .websocket import WebSocket, WebSocketClient, WebSocketMiddleware
+from .websocket import WebSocket, WebSocketMiddleware
 from ._uwsgi import uwsgi
 
 
@@ -26,6 +26,9 @@ class GeventWebSocketClient(object):
         self.send_event.set()
 
     def receive(self):
+        return self.recv()
+
+    def recv(self):
         return self.recv_queue.get()
 
     def close(self):
@@ -60,7 +63,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
         # spawn recv listener
         def listener(client):
-            ready = select([client.fd], [], [], client.timeout)
+            select([client.fd], [], [], client.timeout)
             recv_event.set()
         listening = spawn(listener, client)
 
@@ -72,7 +75,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                 return ''
 
             # wait for event to draw our attention
-            ready = wait([handler, send_event, recv_event], None, 1)
+            wait([handler, send_event, recv_event], None, 1)
 
             # handle send events
             if send_event.is_set():

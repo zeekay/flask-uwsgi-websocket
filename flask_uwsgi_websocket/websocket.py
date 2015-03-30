@@ -17,7 +17,7 @@ class WebSocketClient(object):
         self.id      = str(uuid.uuid1())
 
     def receive(self):
-        return uwsgi.websocket_recv()
+        return self.recv()
 
     def recv(self):
         return uwsgi.websocket_recv()
