@@ -7,7 +7,6 @@ class AsyncWebSocketClient(WebSocketClient):
         while True:
             uwsgi.wait_fd_read(self.fd, self.timeout)
             uwsgi.suspend()
-            fd = uwsgi.ready_fd()
             if uwsgi.ready_fd() == self.fd:
                 return uwsgi.websocket_recv_nb()
 
