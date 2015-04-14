@@ -17,16 +17,19 @@
                     $('#messages').append("<li>Your browser doesn't support WebSockets.</li>");
                 }
             }
-            ws = new WebSocket('ws://127.0.0.1:5000/websocket');
+            var ws = new WebSocket('ws://127.0.0.1:5000/websocket');
             ws.onopen = function(evt) {
                 $('#messages').append('<li>WebSocket connection opened.</li>');
             }
+
             ws.onmessage = function(evt) {
                 $('#messages').append('<li>' + evt.data + '</li>');
             }
+
             ws.onclose = function(evt) {
                 $('#messages').append('<li>WebSocket connection closed.</li>');
             }
+
             $('#send').submit(function() {
                 ws.send($('input:first').val());
                 $('input:first').val('').focus();

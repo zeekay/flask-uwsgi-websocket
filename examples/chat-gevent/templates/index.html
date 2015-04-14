@@ -31,6 +31,10 @@
             showMessage(evt.data)
           }
 
+          ws.onclose = function(evt) {
+              $('#messages').append('<li>WebSocket connection closed.</li>');
+          }
+
           $('#send-message').submit(function() {
             var message = $('#name').val() + ": " + $('#message').val();
             showMessage(message)
