@@ -10,7 +10,7 @@ class WebSocketClient(object):
     Default WebSocket client has a blocking recieve method, but still exports
     rest of uWSGI API.
     '''
-    def __init__(self, environ, fd, timeout=60):
+    def __init__(self, environ, fd, timeout=5):
         self.environ = environ
         self.fd      = fd
         self.timeout = timeout
@@ -20,7 +20,10 @@ class WebSocketClient(object):
         return self.recv()
 
     def recv(self):
-        return uwsgi.websocket_recv()
+        try:
+            return uwsgi.websocket_recv()
+        except IOError:
+            return None
 
     def recv_nb(self):
         return uwsgi.websocket_recv_nb()
@@ -65,7 +68,7 @@ class WebSocket(object):
     '''
     middleware = WebSocketMiddleware
 
-    def __init__(self, app=None, timeout=60):
+    def __init__(self, app=None, timeout=5):
         if app:
             self.init_app(app)
         self.timeout = timeout

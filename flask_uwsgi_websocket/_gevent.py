@@ -9,7 +9,8 @@ from ._uwsgi import uwsgi
 
 
 class GeventWebSocketClient(object):
-    def __init__(self, environ, fd, send_event, send_queue, recv_event, recv_queue, timeout=60):
+    def __init__(self, environ, fd, send_event, send_queue, recv_event,
+                 recv_queue, timeout=5):
         self.environ    = environ
         self.fd         = fd
         self.send_event = send_event
@@ -45,7 +46,8 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             return self.wsgi_app(environ, start_response)
 
         # do handshake
-        uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
+        uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'],
+                                  environ.get('HTTP_ORIGIN', ''))
 
         # setup events
         send_event = Event()
@@ -56,13 +58,15 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
         # create websocket client
         client = self.client(environ, uwsgi.connection_fd(), send_event,
-                             send_queue, recv_event, recv_queue, self.websocket.timeout)
+                             send_queue, recv_event, recv_queue,
+                             self.websocket.timeout)
 
         # spawn handler
         handler = spawn(handler, client)
 
         # spawn recv listener
         def listener(client):
+            # wait max `client.timeout` seconds to allow ping to be sent
             select([client.fd], [], [], client.timeout)
             recv_event.set()
         listening = spawn(listener, client)
@@ -80,11 +84,10 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             # handle send events
             if send_event.is_set():
                 try:
-                    try:
-                        while True:
-                            uwsgi.websocket_send(send_queue.get_nowait())
-                    except Empty:
-                        send_event.clear()
+                    while True:
+                        uwsgi.websocket_send(send_queue.get_nowait())
+                except Empty:
+                    send_event.clear()
                 except IOError:
                     client.connected = False
 
