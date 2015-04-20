@@ -18,7 +18,6 @@ class GeventWebSocketClient(object):
         self.recv_event = recv_event
         self.recv_queue = recv_queue
         self.timeout    = timeout
-
         self.id         = str(uuid.uuid1())
         self.connected  = True
 
