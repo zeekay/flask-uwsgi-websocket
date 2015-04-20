@@ -11,10 +11,11 @@ class WebSocketClient(object):
     rest of uWSGI API.
     '''
     def __init__(self, environ, fd, timeout=5):
-        self.environ = environ
-        self.fd      = fd
-        self.timeout = timeout
-        self.id      = str(uuid.uuid1())
+        self.environ   = environ
+        self.fd        = fd
+        self.timeout   = timeout
+        self.id        = str(uuid.uuid1())
+        self.connected = True
 
     def receive(self):
         return self.recv()
@@ -39,6 +40,9 @@ class WebSocketClient(object):
 
     def send_binary_from_sharedarea(self, id, pos):
         return uwsgi.websocket_send_binary_from_sharedarea(id, pos)
+
+    def close(self):
+        self.connected = False
 
 
 class WebSocketMiddleware(object):
