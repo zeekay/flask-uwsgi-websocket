@@ -95,7 +95,9 @@ class WebSocket(object):
 
         # constructing uwsgi arguments
         uwsgi_args = ' '.join(['--{0} {1}'.format(k,v) for k,v in kwargs.items()])
-        args = 'uwsgi --http {0}:{1} --http-websockets {2} --wsgi {3}'.format(host, port, uwsgi_args, app)
+
+        uwsgi_executable = "{0}/uwsgi".format(os.path.dirname(sys.executable))
+        args = '{0} --http {1}:{2} --http-websockets {3} --wsgi {4}'.format(uwsgi_executable, host, port, uwsgi_args, app)
 
         # set enviromental variable to trigger adding debug middleware
         if self.app.debug or debug:
