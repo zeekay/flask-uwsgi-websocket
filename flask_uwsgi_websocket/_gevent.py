@@ -2,6 +2,7 @@ from gevent import spawn, wait
 from gevent.event import Event
 from gevent.queue import Queue, Empty
 from gevent.select import select
+from gevent.monkey import patch_all
 import uuid
 
 from .websocket import WebSocket, WebSocketMiddleware
