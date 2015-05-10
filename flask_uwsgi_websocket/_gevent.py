@@ -1,8 +1,9 @@
+import uuid
 from gevent import spawn, wait
 from gevent.event import Event
+from gevent.monkey import patch_all
 from gevent.queue import Queue, Empty
 from gevent.select import select
-import uuid
 
 from .websocket import WebSocket, WebSocketMiddleware
 from ._uwsgi import uwsgi
@@ -21,8 +22,14 @@ class GeventWebSocketClient(object):
         self.id         = str(uuid.uuid1())
         self.connected  = True
 
-    def send(self, message):
-        self.send_queue.put(message)
+    def send(self, msg, binary=True):
+        if binary:
+            return self.send_binary(msg)
+        self.send_queue.put(msg)
+        self.send_event.set()
+
+    def send_binary(self, msg):
+        self.send_queue.put(msg)
         self.send_event.set()
 
     def receive(self):
@@ -107,3 +114,8 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
 class GeventWebSocket(WebSocket):
     middleware = GeventWebSocketMiddleware
+
+    def init_app(self, app):
+        aggressive = app.config.get('UWSGI_WEBSOCKET_AGGRESSIVE_PATCH', True)
+        patch_all(aggressive=aggressive)
+        super(GeventWebSocket, self).init_app(app)
