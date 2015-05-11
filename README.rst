@@ -13,9 +13,9 @@ including Gevent. Inspired by `Flask-Sockets
     from flask.ext.uwsgi_websocket import GeventWebSocket
 
     app = Flask(__name__)
-    ws = GeventWebSocket(app)
+    websocket = GeventWebSocket(app)
 
-    @ws.route('/echo')
+    @websocket.route('/echo')
     def echo(ws):
         while True:
             msg = ws.receive()
