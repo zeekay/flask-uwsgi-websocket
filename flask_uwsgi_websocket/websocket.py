@@ -65,6 +65,7 @@ class WebSocketMiddleware(object):
 
         uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
         handler(self.client(environ, uwsgi.connection_fd(), self.websocket.timeout))
+        return []
 
 
 class WebSocket(object):
