@@ -3,6 +3,8 @@ import sys
 import uuid
 
 from ._uwsgi import uwsgi
+from werkzeug.routing import Map, Rule, RequestRedirect, BuildError
+from werkzeug.exceptions import HTTPException
 
 
 class WebSocketClient(object):
@@ -58,13 +60,19 @@ class WebSocketMiddleware(object):
         self.websocket = websocket
 
     def __call__(self, environ, start_response):
-        handler = self.websocket.routes.get(environ['PATH_INFO'])
+        urls = self.websocket.url_map.bind_to_environ(environ)
+        try:
+            endpoint, args = urls.match()
+            print(endpoint, args)
+            handler = self.websocket.view_functions[endpoint]
+        except HTTPException as e:
+            raise e
 
         if not handler or 'HTTP_SEC_WEBSOCKET_KEY' not in environ:
             return self.wsgi_app(environ, start_response)
 
         uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
-        handler(self.client(environ, uwsgi.connection_fd(), self.websocket.timeout))
+        handler(self.client(environ, uwsgi.connection_fd(), self.websocket.timeout), **args)
         return []
 
 
@@ -80,6 +88,8 @@ class WebSocket(object):
             self.init_app(app)
         self.timeout = timeout
         self.routes = {}
+        self.url_map = Map()
+        self.view_functions = {}
 
     def run(self, app=None, debug=False, host='localhost', port=5000, **kwargs):
         if not app:
@@ -119,8 +129,29 @@ class WebSocket(object):
         app.wsgi_app = self.middleware(app.wsgi_app, self)
         app.run = lambda **kwargs: self.run(**kwargs)
 
-    def route(self, rule):
+    def route(self, rule, **options):
         def decorator(f):
-            self.routes[rule] = f
+            endpoint = options.pop('endpoint', None)
+            self.add_url_rule(rule, endpoint, f, **options)
             return f
         return decorator
+
+    def add_url_rule(self, rule, endpoint=None, view_func=None, **options):
+        assert view_func is not None, 'view_func is mandatory'
+        if endpoint is None:
+            endpoint = view_func.__name__
+        options['endpoint'] = endpoint
+        # supposed to be GET
+        methods = set(('GET', ))
+        required_methods = set()
+        provide_automatic_options = False
+
+        rule = Rule(rule, methods=methods, **options)
+        rule.provide_automatic_options = provide_automatic_options
+        self.url_map.add(rule)
+        if view_func is not None:
+            old_func = self.view_functions.get(endpoint)
+            if old_func is not None and old_func != view_func:
+                raise AssertionError('View function mapping is overwriting an '
+                                     'existing endpoint function: %s' % endpoint)
+            self.view_functions[endpoint] = view_func
