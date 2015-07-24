@@ -5,6 +5,7 @@ import uuid
 from ._uwsgi import uwsgi
 from werkzeug.routing import Map, Rule, RequestRedirect, BuildError
 from werkzeug.exceptions import HTTPException
+from flask.app import setupmethod
 
 
 class WebSocketClient(object):
@@ -90,6 +91,13 @@ class WebSocket(object):
         self.routes = {}
         self.url_map = Map()
         self.view_functions = {}
+        self.blueprints = {}
+        if app is not None:
+            self.debug = app.debug
+            self._got_first_request = app._got_first_request
+        else:
+            self.debug = False
+            self._got_first_request = False
 
     def run(self, app=None, debug=False, host='localhost', port=5000, **kwargs):
         if not app:
@@ -155,3 +163,21 @@ class WebSocket(object):
                 raise AssertionError('View function mapping is overwriting an '
                                      'existing endpoint function: %s' % endpoint)
             self.view_functions[endpoint] = view_func
+
+    # merged from flask.app
+    @setupmethod
+    def register_blueprint(self, blueprint, **options):
+        '''
+        Registers a blueprint on the WebSockets.
+        '''
+        first_registration = False
+        if blueprint.name in self.blueprints:
+            assert self.blueprints[blueprint.name] is blueprint, \
+                'A blueprint\'s name collision occurred between %r and ' \
+                '%r.  Both share the same name "%s".  Blueprints that ' \
+                'are created on the fly need unique names.' % \
+                (blueprint, self.blueprints[blueprint.name], blueprint.name)
+        else:
+            self.blueprints[blueprint.name] = blueprint
+            first_registration = True
+        blueprint.register(self, options, first_registration)
