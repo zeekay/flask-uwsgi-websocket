@@ -6,6 +6,7 @@ from gevent.queue import Queue, Empty
 from gevent.select import select
 
 from .websocket import WebSocket, WebSocketMiddleware
+from werkzeug.exceptions import HTTPException
 from ._uwsgi import uwsgi
 
 
@@ -46,7 +47,13 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
     client = GeventWebSocketClient
 
     def __call__(self, environ, start_response):
-        handler = self.websocket.routes.get(environ['PATH_INFO'])
+        urls = self.websocket.url_map.bind_to_environ(environ)
+        try:
+            endpoint, args = urls.match()
+            print(endpoint, args)
+            handler = self.websocket.view_functions[endpoint]
+        except HTTPException:
+            handler = None
 
         if not handler or 'HTTP_SEC_WEBSOCKET_KEY' not in environ:
             return self.wsgi_app(environ, start_response)
@@ -68,7 +75,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                              self.websocket.timeout)
 
         # spawn handler
-        handler = spawn(handler, client)
+        handler = spawn(handler, client, **args)
 
         # spawn recv listener
         def listener(client):
