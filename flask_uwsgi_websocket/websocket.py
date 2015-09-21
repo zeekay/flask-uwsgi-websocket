@@ -114,7 +114,7 @@ class WebSocket(object):
 
         # constructing uwsgi arguments
         uwsgi_args = ' '.join(['--{0} {1}'.format(k,v) for k,v in kwargs.items()])
-        uwsgi_exe = uwsgi_binary or os.environ.get('FLASK_UWSGI_BINARY') or 'uwsgi'
+        uwsgi_exe = uwsgi_binary or os.environ.get('FLASK_UWSGI_BINARY') or "{0}/uwsgi".format(os.path.dirname(sys.executable))
         
         args = '{0} --http {1}:{2} --http-websockets {3} --wsgi {4}'.format(uwsgi_exe, host, port, uwsgi_args, app)
 
