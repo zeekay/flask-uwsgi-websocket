@@ -1,8 +1,7 @@
 import os
-import sys
 import uuid
 
-from ._uwsgi import uwsgi
+from ._uwsgi import uwsgi, run_uwsgi
 from werkzeug.routing import Map, Rule, RequestRedirect, BuildError
 from werkzeug.exceptions import HTTPException
 from flask.app import setupmethod
@@ -103,28 +102,10 @@ class WebSocket(object):
         if not app:
             app = self.app.name + ':app'
 
-        # kwargs are treated as uwsgi arguments
-        if kwargs.get('master') is None:
-            kwargs['master'] = True
+        if self.app.debug:
+            debug = True
 
-        # boolean should be treated as empty value
-        for k,v in kwargs.items():
-            if v is True:
-                kwargs[k] = ''
-
-        # constructing uwsgi arguments
-        uwsgi_args = ' '.join(['--{0} {1}'.format(k,v) for k,v in kwargs.items()])
-        uwsgi_exe = uwsgi_binary or os.environ.get('FLASK_UWSGI_BINARY') or 'uwsgi'
-        
-        args = '{0} --http {1}:{2} --http-websockets {3} --wsgi {4}'.format(uwsgi_exe, host, port, uwsgi_args, app)
-
-        # set enviromental variable to trigger adding debug middleware
-        if self.app.debug or debug:
-            args = 'FLASK_UWSGI_DEBUG=true {0} --python-autoreload 1'.format(args)
-
-        # run uwsgi with our args
-        print('Running: {0}'.format(args))
-        sys.exit(os.system(args))
+        run_uwsgi(app, debug, host, port, uwsgi_binary, **kwargs)
 
     def init_app(self, app):
         self.app = app
