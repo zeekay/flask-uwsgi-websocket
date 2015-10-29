@@ -2,7 +2,7 @@ import os
 import uuid
 
 from ._uwsgi import uwsgi, run_uwsgi
-from werkzeug.routing import Map, Rule, RequestRedirect, BuildError
+from werkzeug.routing import Map, Rule
 from werkzeug.exceptions import HTTPException
 from flask.app import setupmethod
 
@@ -131,7 +131,6 @@ class WebSocket(object):
         options['endpoint'] = endpoint
         # supposed to be GET
         methods = set(('GET', ))
-        required_methods = set()
         provide_automatic_options = False
 
         rule = Rule(rule, methods=methods, **options)
