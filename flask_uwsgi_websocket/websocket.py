@@ -63,10 +63,9 @@ class WebSocketMiddleware(object):
         urls = self.websocket.url_map.bind_to_environ(environ)
         try:
             endpoint, args = urls.match()
-            print(endpoint, args)
             handler = self.websocket.view_functions[endpoint]
-        except HTTPException as e:
-            raise e
+        except HTTPException:
+            handler = None
 
         if not handler or 'HTTP_SEC_WEBSOCKET_KEY' not in environ:
             return self.wsgi_app(environ, start_response)
