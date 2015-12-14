@@ -1,8 +1,7 @@
 import os
-import sys
 import uuid
 
-from ._uwsgi import uwsgi
+from ._uwsgi import uwsgi, run_uwsgi
 from werkzeug.routing import Map, Rule, RequestRedirect, BuildError
 from werkzeug.exceptions import HTTPException
 from flask.app import setupmethod
@@ -64,7 +63,6 @@ class WebSocketMiddleware(object):
         urls = self.websocket.url_map.bind_to_environ(environ)
         try:
             endpoint, args = urls.match()
-            print(endpoint, args)
             handler = self.websocket.view_functions[endpoint]
         except HTTPException:
             handler = None
@@ -99,32 +97,14 @@ class WebSocket(object):
             self.debug = False
             self._got_first_request = False
 
-    def run(self, app=None, debug=False, host='localhost', port=5000, **kwargs):
+    def run(self, app=None, debug=False, host='localhost', port=5000, uwsgi_binary=None, **kwargs):
         if not app:
             app = self.app.name + ':app'
 
-        # kwargs are treated as uwsgi arguments
-        if kwargs.get('master') is None:
-            kwargs['master'] = True
+        if self.app.debug:
+            debug = True
 
-        # boolean should be treated as empty value
-        for k,v in kwargs.items():
-            if v is True:
-                kwargs[k] = ''
-
-        # constructing uwsgi arguments
-        uwsgi_args = ' '.join(['--{0} {1}'.format(k,v) for k,v in kwargs.items()])
-
-        uwsgi_executable = "{0}/uwsgi".format(os.path.dirname(sys.executable))
-        args = '{0} --http {1}:{2} --http-websockets {3} --wsgi {4}'.format(uwsgi_executable, host, port, uwsgi_args, app)
-
-        # set enviromental variable to trigger adding debug middleware
-        if self.app.debug or debug:
-            args = 'FLASK_UWSGI_DEBUG=true {0} --python-autoreload 1'.format(args)
-
-        # run uwsgi with our args
-        print('Running: {0}'.format(args))
-        sys.exit(os.system(args))
+        run_uwsgi(app, debug, host, port, uwsgi_binary, **kwargs)
 
     def init_app(self, app):
         self.app = app
@@ -151,7 +131,6 @@ class WebSocket(object):
         options['endpoint'] = endpoint
         # supposed to be GET
         methods = set(('GET', ))
-        required_methods = set()
         provide_automatic_options = False
 
         rule = Rule(rule, methods=methods, **options)

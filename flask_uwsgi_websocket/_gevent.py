@@ -5,6 +5,8 @@ from gevent.monkey import patch_all
 from gevent.queue import Queue, Empty
 from gevent.select import select
 
+from werkzeug.exceptions import HTTPException
+
 from .websocket import WebSocket, WebSocketMiddleware
 from werkzeug.exceptions import HTTPException
 from ._uwsgi import uwsgi
@@ -50,7 +52,6 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         urls = self.websocket.url_map.bind_to_environ(environ)
         try:
             endpoint, args = urls.match()
-            print(endpoint, args)
             handler = self.websocket.view_functions[endpoint]
         except HTTPException:
             handler = None
