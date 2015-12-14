@@ -8,6 +8,7 @@ from gevent.select import select
 from werkzeug.exceptions import HTTPException
 
 from .websocket import WebSocket, WebSocketMiddleware
+from werkzeug.exceptions import HTTPException
 from ._uwsgi import uwsgi
 
 

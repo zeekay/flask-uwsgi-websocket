@@ -2,7 +2,7 @@ import os
 import uuid
 
 from ._uwsgi import uwsgi, run_uwsgi
-from werkzeug.routing import Map, Rule
+from werkzeug.routing import Map, Rule, RequestRedirect, BuildError
 from werkzeug.exceptions import HTTPException
 from flask.app import setupmethod
 
