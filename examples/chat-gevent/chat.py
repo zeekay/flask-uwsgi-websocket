@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from collections import deque
-from flask import Flask, render_template, request
+from flask import Flask, render_template
 from flask.ext.uwsgi_websocket import GeventWebSocket
 
 app = Flask(__name__)
@@ -11,10 +11,7 @@ backlog = deque(maxlen=10)
 
 @app.route('/')
 def index():
-    uri = '%s://%s/%s' % \
-        (request.environ['wsgi.url_scheme'] == 'https' and 'wss' or 'ws', \
-        request.headers['host'], 'websocket')
-    return render_template('index.html', websocket_uri = uri)
+    return render_template('index.html')
 
 
 @ws.route('/websocket')
