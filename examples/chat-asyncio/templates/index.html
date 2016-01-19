@@ -1,0 +1,56 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8" />
+    <title>WebSocket Chat Example</title>
+
+    <style>
+        li { list-style: none; }
+    </style>
+
+    <script>
+    document.onreadystatechange = function() {
+        if (document.readyState == "complete") {
+            function showMessage(message) {
+                var i = document.createElement('li');
+                i.textContent = message;
+                document.getElementById('messages').appendChild(i);
+            }
+            if (!window.WebSocket) {
+                if (window.MozWebSocket) {
+                    window.WebSocket = window.MozWebSocket;
+                } else {
+                    showMessage("Your browser doesn't support WebSockets")
+                }
+            }
+            names = ["Smith", "Jones", "Williams", "Taylor", "Brown", "Davies", "Evans", "Wilson", "Thomas", "Johnson"];
+            document.getElementById('name').value = names[Math.floor(Math.random() * names.length)];
+            var scheme = (location.protocol == "https:") ? "wss" : "ws";
+            var ws = new WebSocket(scheme + "://" + location.host + "/websocket");
+            ws.onopen = function(evt) {
+                showMessage('Connected to chat.')
+            }
+            ws.onmessage = function(evt) {
+                showMessage(evt.data)
+            }
+            ws.onclose = function(evt) {
+                showMessage('WebSocket connection closed.')
+            }
+            document.getElementById('send-message').addEventListener('click', function(event) {
+                var message = document.getElementById('name').value + ": " + document.getElementById('message').value;
+                if (ws.readyState == ws.OPEN) {showMessage(message); }
+                ws.send(message);
+            }, false);
+        }
+    }
+    </script>
+</head>
+<body>
+    <h2>WebSocket Chat Example</h2>
+    <div>
+        <input id="name" type="text" value="name">
+        <input id="message" type="text" value="message" />
+        <input id="send-message" type="submit" value="Send" />
+    </div>
+    <div id="messages"></div>
+</body>
+</html>
