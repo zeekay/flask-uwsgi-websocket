@@ -1,0 +1,52 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8" />
+    <title>WebSocket Echo Example</title>
+
+    <style>
+        li { list-style: none; }
+    </style>
+
+    <script>
+    document.onreadystatechange = function() {
+        if (document.readyState == "complete") {
+            function showMessage(message) {
+                var i = document.createElement('li');
+                i.textContent = message;
+                document.getElementById('messages').appendChild(i);
+            }
+            if (!window.WebSocket) {
+                if (window.MozWebSocket) {
+                    window.WebSocket = window.MozWebSocket;
+                } else {
+                    showMessage("Your browser doesn't support WebSockets")
+                }
+            }
+            var scheme = (location.protocol == "https:") ? "wss" : "ws";
+            var ws = new WebSocket(scheme + "://" + location.host + "/websocket");
+            ws.onopen = function(evt) {
+                showMessage('Connected to chat.')
+            }
+            ws.onmessage = function(evt) {
+                showMessage(evt.data)
+            }
+            ws.onclose = function(evt) {
+                showMessage('WebSocket connection closed.')
+            }
+            document.getElementById('send-message').addEventListener('click', function(event) {
+                var message = document.getElementById('message').value;
+                ws.send(message);
+            }, false);
+        }
+    }
+    </script>
+</head>
+<body>
+    <h2>WebSocket Echo Example</h2>
+    <div>
+        <input id="message" type="text" value="message" />
+        <input id="send-message" type="submit" value="Send" />
+    </div>
+    <div id="messages"></div>
+</body>
+</html>
