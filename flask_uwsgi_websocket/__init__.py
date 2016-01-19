@@ -22,3 +22,13 @@ except ImportError:
     class GeventWebSocket(object):
         def __init__(self, *args, **kwargs):
             raise GeventNotInstalled("Gevent must be installed to use GeventWebSocket. Try: `pip install gevent`.")
+
+class AsyncioNotAvailable(Exception):
+    pass
+
+try:
+    from ._asyncio import *
+except ImportError:
+    class AsyncioWebSocket(object):
+        def __init__(self, *args, **kwargs):
+            raise AsyncioNotAvailable("Asyncio should be enabled at uwsgi compile time. Try: `UWSGI_PROFILE=asyncio pip install uwsgi`.")
