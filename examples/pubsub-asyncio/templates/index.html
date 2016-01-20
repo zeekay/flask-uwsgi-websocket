@@ -1,0 +1,80 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8" />
+    <title>WebSocket Redis-Pubsub Example</title>
+
+    <style>
+        li { list-style: none; }
+    </style>
+
+    <script>
+    document.onreadystatechange = function() {
+        if (document.readyState == "complete") {
+            function showMessage(message) {
+                var i = document.createElement('li');
+                i.textContent = message;
+                document.getElementById('messages').appendChild(i);
+            }
+            if (!window.WebSocket) {
+                if (window.MozWebSocket) {
+                    window.WebSocket = window.MozWebSocket;
+                } else {
+                    showMessage("Your browser doesn't support WebSockets")
+                }
+            }
+            var ws;
+            var scheme = (location.protocol == "https:") ? "wss" : "ws";
+            document.getElementById('target').value = scheme + "://" + location.host + "/websocket/chatchannel";
+            document.getElementById('connect').addEventListener('click', function(event) {
+                ws = new WebSocket(document.getElementById('target').value);
+                ws.onopen = function(evt) {
+                    showMessage('Connected to chat.')
+                    document.getElementById('connect').disabled = true;
+                    document.getElementById('disconnect').disabled = false;
+                    document.getElementById('send').disabled = false;
+                }
+                ws.onmessage = function(evt) {
+                    showMessage(evt.data)
+                }
+                ws.onclose = function(evt) {
+                    showMessage('WebSocket connection closed.')
+                    document.getElementById('connect').disabled = false;
+                    document.getElementById('disconnect').disabled = true;
+                    document.getElementById('send').disabled = true;
+                }
+            }, false);
+            document.getElementById('disconnect').disabled = true;
+            document.getElementById('disconnect').addEventListener('click', function(event) {
+                ws.close();
+            }, false);
+            document.getElementById('send').disabled = true;
+            names = ["Smith", "Jones", "Williams", "Taylor", "Brown", "Davies", "Evans", "Wilson", "Thomas", "Johnson"];
+            document.getElementById('name').value = names[Math.floor(Math.random() * names.length)];
+            document.getElementById('send').addEventListener('click', function(event) {
+                var message = document.getElementById('name').value + ": " + document.getElementById('message').value;
+                ws.send(message);
+            }, false);
+            document.getElementById('clear').addEventListener('click', function(event) {
+                var m = document.getElementById('messages');
+                while (m.lastChild) { m.removeChild(m.lastChild); }
+            }, false);
+        }
+    }
+    </script>
+</head>
+<body>
+    <h2>WebSocket Redis-Pubsub Example</h2>
+    <div>
+        <input id="target" type="text" size="40">
+        <input id="connect" type="submit" value="Connect">
+        <input id="disconnect" type="submit" value="Disconnect">
+    </div>
+    <div>
+        <input id="name" type="text" value="name">
+        <input id="message" type="text" value="message" />
+        <input id="send" type="submit" value="Send" />
+        <input id="clear" type="submit" value="Clear" />
+    </div>
+    <div id="messages"></div>
+</body>
+</html>
