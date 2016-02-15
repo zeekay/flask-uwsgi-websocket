@@ -62,7 +62,7 @@ uWSGI on Linux
 If your Linux distribution includes uWSGI with specific plugins, that is many
 times your best bet. If that fails or you'd prefer to compile uWSGI yourself,
 you'll need to ensure that the requisite build tools, OpenSSL headers, etc are
-installed.
+installed::
 
     $ apt-get install build-essential libssl-dev python3-dev python3-venv
 
