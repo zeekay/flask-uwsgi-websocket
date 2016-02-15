@@ -31,6 +31,56 @@ Preferred method of installation is via pip::
 
     $ pip install Flask-uWSGI-WebSocket
 
+uWSGI
+~~~~~~~~~~
+Of course you'll also need uWSGI (with SSL support, at minimum). It can also be
+installed with pip::
+
+    $ pip install uwsgi
+
+If that fails or you need to enable the asyncio plugin, read on.
+
+Installing uWSGI on Mac OS X
+~~~~~~~~~~~~~~~~~~~
+On some versions of Mac OS X, OpenSSL headers are no longer included. If you
+use Homebrew, install OpenSSL and ensure they are available::
+
+    $ brew install openssl && brew link openssl --force
+
+This should ensure pip can install uWSGI::
+
+    $ LDFLAGS="-L/usr/local/lib" pip install uwsgi --no-use-wheel
+
+If you plan to use the asyncio plugin, you'll need to ensure that it's enabled
+when uWSGI is compiled. You can use ``UWSGI_PROFILE`` to do this. With Homebrew Python 3.5 installed::
+
+    $ LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include/python3.5m" UWSGI_PROFLILE="asyncio" pip3 install uwsgi --no-use-wheel
+
+
+Installing uWSGI on Linux
+~~~~~~~~~~~~~~~~~~~
+If your Linux distribution includes uWSGI with specific plugins, that is many
+times your best bet. If that fails or you'd prefer to compile uWSGI yourself,
+you'll need to ensure that the requisite build tools, OpenSSL headers, etc are
+installed.
+
+    $ apt-get install build-essential libssl-dev python3-dev python3-venv
+
+According to the `uWSGI asyncio docs
+<http://uwsgi-docs.readthedocs.org/en/latest/asyncio.html>`_, ``UWSGI_PROFILE``
+and ``greenlet.h`` location should be specified.
+
+If you are installing uWSGI into a virtualenv, the process is::
+
+    $ python3 -m venv pyvenv
+    $ . pyvenv/bin/activate
+    (pyvenv)$ pip install greenlet
+
+Now, ``greenlet.h`` should be available at ``$VIRTUAL_ENV/include/site/python3.5``. To build with pip::
+
+    $ mkdir -p $VIRTUAL_ENV/include/site/python3.5/greenlet
+    $ ln -s ../greenlet.h $VIRTUAL_ENV/include/site/python3.5/greenlet/
+    $ CFLAGS="-I$VIRTUAL_ENV/include/site/python3.5" UWSGI_PROFILE="asyncio" pip install uwsgi --no-use-wheel
 
 Deployment
 ----------
@@ -53,19 +103,25 @@ gevent loop engine::
 
     app.run(debug=True, gevent=100)
 
-
 Note that you cannot use multiple threads with gevent loop engine.
+
+To enable asyncio instead::
+
+    $ uwsgi --master --http :5000 --http-websockets --asyncio 100 --greenlet --wsgi chat:app
+
+...or::
+
+    app.run(debug=True, asyncio=100, greenlet=True)
 
 For production you'll probably want to run uWSGI behind Haproxy or nginx,
 instead of using the built-int HTTP router. Explore the `uWSGI documentation
-<http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html>`_ for more
-detail about the various concurrency and deployment options.
-
+<http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html>`_ to learn more
+about the various concurrency and deployment options.
 
 Development
 -----------
 It's possible to take advantage of Flask's interactive debugger by installing
-werkzeug's ``DebuggedApplication`` middleware::
+Werkzeug's ``DebuggedApplication`` middleware::
 
     from werkzeug.debug import DebuggedApplication
     app.wsgi_app = DebuggedApplication(app.wsgi_app, True)
@@ -141,6 +197,34 @@ WebSocket client abstraction with fully non-blocking methods.
 ``receive()``
 
 ``send(msg)``
+
+``close()``
+
+``connected``
+
+
+``flask_uwsgi_websocket.AsyncioWebSocket``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Fancier WebSocket abstraction that takes advantage of Asyncio loop engine.
+Requires uWSGI to be run with ``--asyncio`` and ``--greenlet`` option.
+
+
+``flask_uwsgi_websocket.AsyncioWebSocketMiddleware``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Automatically performs WebSocket handshake and passes a ``AsyncioWebSocketClient`` instance to your route.
+
+
+``flask_uwsgi_websocket.AsyncioWebSocketClient``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+WebSocket client abstraction with asyncio coroutines.
+
+``coroutine a_recv()`` (alias ``receive()``, ``recv()``)
+
+``coroutine a_send(msg)`` (alias ``send()``)
+
+``recv_nb()`` (should be useless)
+
+``send_nb()`` (should be useless)
 
 ``close()``
 
