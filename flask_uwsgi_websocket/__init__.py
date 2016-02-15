@@ -9,6 +9,8 @@ __version__ = '0.5.1'
 __license__ = 'MIT'
 __author__  = 'Zach Kelling'
 
+import sys
+
 from ._uwsgi import uwsgi
 from .websocket import *
 from .async import *
@@ -27,8 +29,9 @@ class AsyncioNotAvailable(Exception):
     pass
 
 try:
+    assert sys.version_info > (3,4)
     from ._asyncio import *
-except ImportError:
+except AssertionError, ImportError:
     class AsyncioWebSocket(object):
         def __init__(self, *args, **kwargs):
             raise AsyncioNotAvailable("Asyncio should be enabled at uwsgi compile time. Try: `UWSGI_PROFILE=asyncio pip install uwsgi`.")
