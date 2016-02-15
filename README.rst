@@ -31,8 +31,8 @@ Preferred method of installation is via pip::
 
     $ pip install Flask-uWSGI-WebSocket
 
-uWSGI
-~~~~~~~~~~
+Installing uWSGI
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Of course you'll also need uWSGI (with SSL support, at minimum). It can also be
 installed with pip::
 
@@ -40,8 +40,8 @@ installed with pip::
 
 If that fails or you need to enable the asyncio plugin, read on.
 
-Installing uWSGI on Mac OS X
-~~~~~~~~~~~~~~~~~~~
+uWSGI on Mac OS X
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 On some versions of Mac OS X, OpenSSL headers are no longer included. If you
 use Homebrew, install OpenSSL and ensure they are available::
 
@@ -57,8 +57,8 @@ when uWSGI is compiled. You can use ``UWSGI_PROFILE`` to do this. With Homebrew 
     $ LDFLAGS="-L/usr/local/lib" CFLAGS="-I/usr/local/include/python3.5m" UWSGI_PROFLILE="asyncio" pip3 install uwsgi --no-use-wheel
 
 
-Installing uWSGI on Linux
-~~~~~~~~~~~~~~~~~~~
+uWSGI on Linux
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 If your Linux distribution includes uWSGI with specific plugins, that is many
 times your best bet. If that fails or you'd prefer to compile uWSGI yourself,
 you'll need to ensure that the requisite build tools, OpenSSL headers, etc are
@@ -140,8 +140,9 @@ There are several examples `available here <https://github.com/zeekay/flask-uwsg
 
 API
 ---
-``flask_uwsgi_websocket.WebSocket``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+``WebSocket``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Applies ``WebSocketMiddleware`` to your Flask App, allowing you to decorate
 routes with the ``route`` method, turning them into WebSocket handlers.
 
@@ -153,14 +154,14 @@ Additionally monkey-patches ``app.run``, to run your app directly in uWSGI.
 ``**kwargs`` are passed to uWSGI as command line arguments.
 
 
-``flask_uwsgi_websocket.WebSocketMiddleware``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``WebSocketMiddleware``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 WebSocket Middleware which automatically performs WebSocket handshake and
 passes ``WebSocketClient`` instances to your route.
 
 
-``flask_uwsgi_websocket.WebSocketClient``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``WebSocketClient``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Exposes the `uWSGI WebSocket API
 <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html#api>`_.
 
@@ -179,19 +180,20 @@ Exposes the `uWSGI WebSocket API
 ``send_binary_from_sharedarea(id, pos)``
 
 
-``flask_uwsgi_websocket.GeventWebSocket``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``GeventWebSocket``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Fancier WebSocket abstraction that takes advantage of Gevent loop engine.
 Requires uWSGI to be run with ``--uwsgi`` option.
 
 
-``flask_uwsgi_websocket.GeventWebSocketMiddleware``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Automatically performs WebSocket handshake and passes a ``GeventWebSocketClient`` instance to your route.
+``GeventWebSocketMiddleware``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Automatically performs WebSocket handshake and passes a
+``GeventWebSocketClient`` instance to your route.
 
 
-``flask_uwsgi_websocket.GeventWebSocketClient``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``GeventWebSocketClient``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 WebSocket client abstraction with fully non-blocking methods.
 
 ``receive()``
@@ -203,19 +205,19 @@ WebSocket client abstraction with fully non-blocking methods.
 ``connected``
 
 
-``flask_uwsgi_websocket.AsyncioWebSocket``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``AsyncioWebSocket``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Fancier WebSocket abstraction that takes advantage of Asyncio loop engine.
 Requires uWSGI to be run with ``--asyncio`` and ``--greenlet`` option.
 
 
-``flask_uwsgi_websocket.AsyncioWebSocketMiddleware``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``AsyncioWebSocketMiddleware``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Automatically performs WebSocket handshake and passes a ``AsyncioWebSocketClient`` instance to your route.
 
 
-``flask_uwsgi_websocket.AsyncioWebSocketClient``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+``AsyncioWebSocketClient``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 WebSocket client abstraction with asyncio coroutines.
 
 ``coroutine a_recv()`` (alias ``receive()``, ``recv()``)
