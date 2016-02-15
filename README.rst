@@ -113,7 +113,7 @@ To enable asyncio instead::
 
     app.run(debug=True, asyncio=100, greenlet=True)
 
-For production you'll probably want to run uWSGI behind Haproxy or nginx,
+For production you'll probably want to run uWSGI behind Haproxy or Nginx,
 instead of using the built-int HTTP router. Explore the `uWSGI documentation
 <http://uwsgi-docs.readthedocs.org/en/latest/WebSockets.html>`_ to learn more
 about the various concurrency and deployment options.
