@@ -31,7 +31,7 @@ class AsyncioNotAvailable(Exception):
 try:
     assert sys.version_info > (3,4)
     from ._asyncio import *
-except AssertionError, ImportError:
+except (AssertionError, ImportError):
     class AsyncioWebSocket(object):
         def __init__(self, *args, **kwargs):
             raise AsyncioNotAvailable("Asyncio should be enabled at uwsgi compile time. Try: `UWSGI_PROFILE=asyncio pip install uwsgi`.")
