@@ -54,7 +54,7 @@ class AsyncioWebSocketClient(WebSocketClient):
             except asyncio.QueueEmpty:
                 msg = ''
         else:
-            msg = ''
+            msg = None
         return msg
 
     @asyncio.coroutine
@@ -69,16 +69,20 @@ class AsyncioWebSocketClient(WebSocketClient):
 
     @asyncio.coroutine
     def a_recv(self):
-        msg = yield from self.recv_queue.get()
+        if self.connected:
+            msg = yield from self.recv_queue.get()
+        else:
+            msg = None
         return msg
 
     @asyncio.coroutine
     def a_send(self, msg):
         yield from self.send_queue.put(msg)
-    
+
     def close(self):
         self.connected = False
         self._loop.remove_reader(self.fd)
+        self.recv_queue.put_nowait(None)
         self._tickhdr.cancel()
 
 
