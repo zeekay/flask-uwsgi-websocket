@@ -136,8 +136,9 @@ class AsyncioWebSocketMiddleware(WebSocketMiddleware):
                 if client.has_msg:
                     client.has_msg = False
                     msg = uwsgi.websocket_recv_nb()
-                    if msg:
+                    while msg:
                         asyncio.Task(client.recv_queue.put(msg))
+                        msg = uwsgi.websocket_recv_nb()
         except OSError:
             client.close()
         return []
