@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 from collections import deque
 from flask import Flask, render_template, Blueprint
-from flask.ext.uwsgi_websocket import AsyncioWebSocket
+from flask_uwsgi_websocket import AsyncioWebSocket
 import asyncio
 import asyncio_redis
 
