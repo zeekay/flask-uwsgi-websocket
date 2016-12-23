@@ -87,7 +87,7 @@ class WebSocket(object):
             self.init_app(app)
         self.timeout = timeout
         self.routes = {}
-        self.url_map = Map()
+        self.url_map = Map(converters=app.url_map.converters if app else None)
         self.view_functions = {}
         self.blueprints = {}
         if app is not None:
