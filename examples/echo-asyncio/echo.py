@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from flask import Flask, render_template
-from flask.ext.uwsgi_websocket import AsyncioWebSocket
+from flask_uwsgi_websocket import AsyncioWebSocket
 from asyncio import coroutine
 
 app = Flask(__name__)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 from flask import Flask, render_template
-from flask.ext.uwsgi_websocket import WebSocket
+from flask_uwsgi_websocket import WebSocket
 
 app = Flask(__name__)
 ws = WebSocket(app)

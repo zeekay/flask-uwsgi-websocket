@@ -10,7 +10,7 @@ including Gevent. Inspired by `Flask-Sockets
 .. code-block:: python
 
     from flask import Flask
-    from flask.ext.uwsgi_websocket import GeventWebSocket
+    from flask_uwsgi_websocket import GeventWebSocket
 
     app = Flask(__name__)
     websocket = GeventWebSocket(app)
@@ -94,7 +94,7 @@ You can use uWSGI's built-in HTTP router to get up and running quickly::
 
 uWSGI supports several concurrency models, in particular it has nice support
 for Gevent. If you want to use Gevent, import
-``flask.ext.uwsgi_websocket.GeventWebSocket`` and configure uWSGI to use the
+``flask_uwsgi_websocket.GeventWebSocket`` and configure uWSGI to use the
 gevent loop engine::
 
     $ uwsgi --master --http :8080 --http-websockets --gevent 100 --wsgi echo:app
