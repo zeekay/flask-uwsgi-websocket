@@ -67,7 +67,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         send_queue = Queue()
 
         recv_event = Event()
-        recv_queue = Queue(maxsize=1)
+        recv_queue = Queue()
 
         # create websocket client
         client = self.client(environ, uwsgi.connection_fd(), send_event,
@@ -108,7 +108,18 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             elif recv_event.is_set():
                 recv_event.clear()
                 try:
-                    recv_queue.put(uwsgi.websocket_recv_nb())
+                    message = True
+                    # More than one message may have arrived, so keep reading
+                    # until an empty message is read. Note that  select()
+                    # won't register after we've read a byte until all the
+                    # bytes are read, make certain to read all the data.
+                    # Experimentally, not putting the final empty message
+                    # into the queue caused websocket timeouts; theoretically
+                    # this code can skip writing the empty message but clients
+                    # should be able to ignore it anyway.
+                    while message:
+                        message = uwsgi.websocket_recv_nb()
+                        recv_queue.put(message)
                     listening = spawn(listener, client)
                 except IOError:
                     client.connected = False
