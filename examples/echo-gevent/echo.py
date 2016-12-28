@@ -9,6 +9,7 @@ ws = GeventWebSocket(app)
 def index():
     return render_template('index.html')
 
+
 @ws.route('/websocket')
 def echo(ws):
     while True:

@@ -17,7 +17,8 @@
                     $('#messages').append("<li>Your browser doesn't support WebSockets.</li>");
                 }
             }
-            var ws = new WebSocket('ws://127.0.0.1:5000/websocket');
+            var scheme = (location.protocol == "https:") ? "wss" : "ws";
+            var ws = new WebSocket(scheme + "://" + location.host + "/websocket");
             ws.onopen = function(evt) {
                 $('#messages').append('<li>WebSocket connection opened.</li>');
             }

@@ -13,6 +13,7 @@ backlog = deque(maxlen=10)
 def index():
     return render_template('index.html')
 
+
 @ws.route('/websocket')
 def chat(ws):
     users[ws.id] = ws
