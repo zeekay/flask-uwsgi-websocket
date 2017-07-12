@@ -13,7 +13,7 @@ from ._uwsgi import uwsgi
 
 class GeventWebSocketClient(object):
     def __init__(self, environ, fd, send_event, send_queue, recv_event,
-                 recv_queue, timeout=5):
+                 recv_queue, is_binary, timeout=5):
         self.environ    = environ
         self.fd         = fd
         self.send_event = send_event
@@ -23,6 +23,7 @@ class GeventWebSocketClient(object):
         self.timeout    = timeout
         self.id         = str(uuid.uuid1())
         self.connected  = True
+        self.is_binary = is_binary
 
     def send(self, msg, binary=True):
         if binary:
@@ -31,6 +32,7 @@ class GeventWebSocketClient(object):
         self.send_event.set()
 
     def send_binary(self, msg):
+        self.is_binary.set()
         self.send_queue.put(msg)
         self.send_event.set()
 
@@ -68,10 +70,12 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
         recv_event = Event()
         recv_queue = Queue()
+        
+        is_binary = Event()
 
         # create websocket client
         client = self.client(environ, uwsgi.connection_fd(), send_event,
-                             send_queue, recv_event, recv_queue,
+                             send_queue, recv_event, recv_queue, is_binary,
                              self.websocket.timeout)
 
         # spawn handler
@@ -98,7 +102,10 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             if send_event.is_set():
                 try:
                     while True:
-                        uwsgi.websocket_send(send_queue.get_nowait())
+                        if not is_binary.is_set():
+                            uwsgi.websocket_send(send_queue.get_nowait())
+                        else:
+                            uwsgi.websocket_send_binary(send_queue.get_nowait())
                 except Empty:
                     send_event.clear()
                 except IOError:
