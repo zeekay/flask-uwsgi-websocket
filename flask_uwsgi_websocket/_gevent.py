@@ -102,7 +102,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             if send_event.is_set():
                 try:
                     while True:
-                        if not is_binary.is_set():
+                        if not is_binary.is_set() or not is_binary:
                             uwsgi.websocket_send(send_queue.get_nowait())
                         else:
                             uwsgi.websocket_send_binary(send_queue.get_nowait())
@@ -126,6 +126,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                     # should be able to ignore it anyway.
                     while message:
                         message = uwsgi.websocket_recv_nb()
+                        print(str(repr(message)))
                         recv_queue.put(message)
                     listening = spawn(listener, client)
                 except IOError:
