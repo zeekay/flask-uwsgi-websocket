@@ -13,7 +13,7 @@ from ._uwsgi import uwsgi
 
 class GeventWebSocketClient(object):
     def __init__(self, environ, fd, send_event, send_queue, recv_event,
-                 recv_queue, is_binary, timeout=5):
+                 recv_queue, is_binary, timeout=5000):
         self.environ    = environ
         self.fd         = fd
         self.send_event = send_event
@@ -40,6 +40,7 @@ class GeventWebSocketClient(object):
         return self.recv()
 
     def recv(self):
+        print('Receive queue for this socket ('+str(repr(self))+')is :'+str(self.recv_queue))
         return self.recv_queue.get()
 
     def close(self):
@@ -70,7 +71,6 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
         recv_event = Event()
         recv_queue = Queue()
-        
         is_binary = Event()
 
         # create websocket client
@@ -102,7 +102,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             if send_event.is_set():
                 try:
                     while True:
-                        if not is_binary.is_set():
+                        if not is_binary.is_set() or not is_binary:
                             uwsgi.websocket_send(send_queue.get_nowait())
                         else:
                             uwsgi.websocket_send_binary(send_queue.get_nowait())
@@ -126,7 +126,12 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                     # should be able to ignore it anyway.
                     while message:
                         message = uwsgi.websocket_recv_nb()
-                        recv_queue.put(message)
+                        print('INTERNAL RECV: ' + str(message))
+                        if message != b'':
+                            recv_queue.put(message)
+                            print('INTERNAL RECV QUEUE: ' + str(recv_queue))
+                        else:
+                            message = False
                     listening = spawn(listener, client)
                 except IOError:
                     client.connected = False
