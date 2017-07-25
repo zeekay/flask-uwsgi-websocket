@@ -13,14 +13,14 @@ from ._uwsgi import uwsgi
 
 class GeventWebSocketClient(object):
     def __init__(self, environ, fd, send_event, send_queue, recv_event,
-                 recv_queue, is_binary, timeout=5000):
+                 recv_queue, is_binary, timeout=6000):
         self.environ    = environ
         self.fd         = fd
         self.send_event = send_event
         self.send_queue = send_queue
         self.recv_event = recv_event
         self.recv_queue = recv_queue
-        self.timeout    = timeout
+        self.timeout    = 6000
         self.id         = str(uuid.uuid1())
         self.connected  = True
         self.is_binary = is_binary
@@ -28,6 +28,7 @@ class GeventWebSocketClient(object):
     def send(self, msg, binary=True):
         if binary:
             return self.send_binary(msg)
+        #self.is_binary.clear()
         self.send_queue.put(msg)
         self.send_event.set()
 
@@ -84,6 +85,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         def listener(client):
             # wait max `client.timeout` seconds to allow ping to be sent
             select([client.fd], [], [], client.timeout)
+            print('we received a message')
             recv_event.set()
         listening = spawn(listener, client)
 
@@ -127,9 +129,10 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                         message = uwsgi.websocket_recv_nb()
                         if message != b'':
                             recv_queue.put_nowait(message)
+                            
                         else:
                             message = False
-
+                    listening.kill()
                     listening = spawn(listener, client)
                 except IOError:
                     client.connected = False
