@@ -126,17 +126,11 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                     # should be able to ignore it anyway.
                     while message:
                         message = uwsgi.websocket_recv_nb()
-<<<<<<< HEAD
-                        print('INTERNAL RECV: ' + str(message))
                         if message != b'':
-                            recv_queue.put(message)
-                            print('INTERNAL RECV QUEUE: ' + str(recv_queue))
+                            recv_queue.put_nowait(message)
                         else:
                             message = False
-=======
-                        print(str(repr(message)))
-                        recv_queue.put(message)
->>>>>>> 63cb79271b69be234f6b6850c7777ff4915ec7b2
+
                     listening = spawn(listener, client)
                 except IOError:
                     client.connected = False
