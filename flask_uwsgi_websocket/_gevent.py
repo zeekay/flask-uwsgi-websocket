@@ -40,7 +40,6 @@ class GeventWebSocketClient(object):
         return self.recv()
 
     def recv(self):
-        print('Receive queue for this socket ('+str(repr(self))+')is :'+str(self.recv_queue))
         return self.recv_queue.get()
 
     def close(self):
