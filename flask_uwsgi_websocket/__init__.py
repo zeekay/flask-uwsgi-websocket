@@ -11,9 +11,9 @@ __author__  = 'Zach Kelling'
 
 import sys
 
+from ._async import *
 from ._uwsgi import uwsgi
 from .websocket import *
-from .fuw_async import *
 
 class GeventNotInstalled(Exception):
     pass
