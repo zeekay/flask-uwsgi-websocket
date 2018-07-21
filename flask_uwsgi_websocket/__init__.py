@@ -13,7 +13,7 @@ import sys
 
 from ._uwsgi import uwsgi
 from .websocket import *
-from .async import *
+from .fuw_async import *
 
 class GeventNotInstalled(Exception):
     pass
