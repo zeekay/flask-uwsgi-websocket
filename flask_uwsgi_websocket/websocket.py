@@ -131,6 +131,9 @@ class WebSocket(object):
         options['endpoint'] = endpoint
         # supposed to be GET
         methods = set(('GET', ))
+        if 'methods' in options:
+            methods = methods.union(options['methods'])
+            options.pop('methods')
         provide_automatic_options = False
 
         rule = Rule(rule, methods=methods, **options)
