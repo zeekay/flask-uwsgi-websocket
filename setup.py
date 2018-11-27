@@ -4,7 +4,7 @@ from setuptools import find_packages, setup
 setup(
     name='Flask-uWSGI-WebSocket',
     version='0.6.1',
-    url='https://github.com/zeekay/flask_uwsgi_websocket',
+    url='https://github.com/zeekay/flask-uwsgi-websocket',
     license='MIT',
     author='Zach Kelling',
     author_email='zk@monoid.io',
