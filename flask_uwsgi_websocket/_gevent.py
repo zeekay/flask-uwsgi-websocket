@@ -13,24 +13,27 @@ from ._uwsgi import uwsgi
 
 class GeventWebSocketClient(object):
     def __init__(self, environ, fd, send_event, send_queue, recv_event,
-                 recv_queue, timeout=5):
+                 recv_queue, is_binary, timeout=6000):
         self.environ    = environ
         self.fd         = fd
         self.send_event = send_event
         self.send_queue = send_queue
         self.recv_event = recv_event
         self.recv_queue = recv_queue
-        self.timeout    = timeout
+        self.timeout    = 6000
         self.id         = str(uuid.uuid1())
         self.connected  = True
+        self.is_binary = is_binary
 
     def send(self, msg, binary=True):
         if binary:
             return self.send_binary(msg)
+        #self.is_binary.clear()
         self.send_queue.put(msg)
         self.send_event.set()
 
     def send_binary(self, msg):
+        self.is_binary.set()
         self.send_queue.put(msg)
         self.send_event.set()
 
@@ -68,10 +71,11 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
 
         recv_event = Event()
         recv_queue = Queue()
+        is_binary = Event()
 
         # create websocket client
         client = self.client(environ, uwsgi.connection_fd(), send_event,
-                             send_queue, recv_event, recv_queue,
+                             send_queue, recv_event, recv_queue, is_binary,
                              self.websocket.timeout)
 
         # spawn handler
@@ -81,6 +85,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
         def listener(client):
             # wait max `client.timeout` seconds to allow ping to be sent
             select([client.fd], [], [], client.timeout)
+            print('we received a message')
             recv_event.set()
         listening = spawn(listener, client)
 
@@ -98,7 +103,10 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             if send_event.is_set():
                 try:
                     while True:
-                        uwsgi.websocket_send(send_queue.get_nowait())
+                        if not is_binary.is_set() or not is_binary:
+                            uwsgi.websocket_send(send_queue.get_nowait())
+                        else:
+                            uwsgi.websocket_send_binary(send_queue.get_nowait())
                 except Empty:
                     send_event.clear()
                 except IOError:
@@ -119,7 +127,12 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                     # should be able to ignore it anyway.
                     while message:
                         message = uwsgi.websocket_recv_nb()
-                        recv_queue.put(message)
+                        if message != b'':
+                            recv_queue.put_nowait(message)
+                            
+                        else:
+                            message = False
+                    listening.kill()
                     listening = spawn(listener, client)
                 except IOError:
                     client.connected = False
