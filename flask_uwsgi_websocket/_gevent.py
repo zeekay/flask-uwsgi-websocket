@@ -88,7 +88,7 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
             if not client.connected:
                 recv_queue.put(None)
                 listening.kill()
-                handler.join(client.timeout)
+                handler.kill()
                 return ''
 
             # wait for event to draw our attention
