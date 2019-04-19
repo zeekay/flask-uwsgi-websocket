@@ -17,7 +17,6 @@ setup(
     platforms='any',
     install_requires=[
         'Flask',
-        'uwsgi',
     ],
     classifiers=[
         'Environment :: Web Environment',
