@@ -75,7 +75,10 @@ class GeventWebSocketMiddleware(WebSocketMiddleware):
                              self.websocket.timeout)
 
         # spawn handler
-        handler = spawn(handler, client, **args)
+        def wrapped_handler():
+            with self.websocket.app.request_context(environ):
+                return handler(client, **args)
+        handler = spawn(wrapped_handler)
 
         # spawn recv listener
         def listener(client):
