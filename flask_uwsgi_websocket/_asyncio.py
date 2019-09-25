@@ -116,13 +116,17 @@ class AsyncioWebSocketMiddleware(WebSocketMiddleware):
 
         if not handler or 'HTTP_SEC_WEBSOCKET_KEY' not in environ:
             return self.wsgi_app(environ, start_response)
+        assert asyncio.iscoroutinefunction(handler)
 
         uwsgi.websocket_handshake(environ['HTTP_SEC_WEBSOCKET_KEY'], environ.get('HTTP_ORIGIN', ''))
 
         client = self.client(environ, uwsgi.connection_fd(), self.websocket.timeout, greenlet.getcurrent())
-
-        assert asyncio.iscoroutinefunction(handler)
-        asyncio.Task(asyncio.coroutine(handler)(client, **args))
+        
+        async def call_handler():
+            with self.websocket.app.request_context(environ):
+                await handler(client, **args)
+        asyncio.Task(call_handler())
+        
         f = GreenFuture()
         asyncio.Task(client._send_ready(f))
         try:
