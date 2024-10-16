@@ -135,8 +135,10 @@ class WebSocket(object):
             methods = methods.union(options['methods'])
             options.pop('methods')
         provide_automatic_options = False
-
-        rule = Rule(rule, methods=methods, **options)
+        try:
+            rule = Rule(rule, methods=methods, websocket=True, **options)
+        except TypeError:
+            rule = Rule(rule, methods=methods, **options)
         rule.provide_automatic_options = provide_automatic_options
         self.url_map.add(rule)
         if view_func is not None:
